@@ -1,0 +1,70 @@
+﻿using UniFi.Net.Models;
+using static System.Console;
+
+namespace UniFi.Net.TestHarness;
+public partial class App
+{
+    private Site? SelectedSite { get; set; } = null;
+
+    private async Task DoSites(int action, CancellationToken cancellationToken)
+    {
+        switch (action)
+        {
+            case 1:
+                var sites = await uniFiClient.ListSites(cancellationToken: cancellationToken);
+                PrintSiteSelectionMenu(sites.Data);
+                break;
+            default:
+                WriteLine("Invalid site action, please try again.");
+                break;
+        }
+    }
+
+    private static int PrintSitesMenu()
+    {
+        Clear();
+        WriteLine("Sites Menu");
+        WriteLine("----------");
+        WriteLine("1. List Sites");
+        WriteLine("2. Back to Main Menu");
+        Write("Select an option: ");
+        var input = ReadKey();
+
+        if (!Int32.TryParse(input.KeyChar.ToString(), out var option) || option > 2)
+        {
+            WriteLine("Invalid option, please try again.");
+            return PrintSitesMenu();
+        }
+
+        return option;
+    }
+
+    private void PrintSiteSelectionMenu(IReadOnlyList<Site> sites)
+    {
+        // Obviously this will not work if there are more than 8 sites, but for simplicity, we will assume there are fewer.
+        Clear();
+        WriteLine("Select a Site:");
+        WriteLine("-------------------------------");
+        for (int i = 0; i < sites.Count; i++)
+        {
+            var site = sites.ElementAt(i);
+            WriteLine($"{i + 1}. {site.Name} ({site.Id})");
+        }
+        WriteLine($"{sites.Count + 1}. Back to Sites Menu");
+        Write("\nSelect an option: ");
+
+        var input = ReadKey();
+
+        if (!Int32.TryParse(input.KeyChar.ToString(), out var option) || option > sites.Count + 1)
+        {
+            WriteLine("Invalid option, please try again.");
+            PrintSiteSelectionMenu(sites);
+        }
+        else if (option < sites.Count + 1)
+        {
+            SelectedSite = sites[option - 1];
+            // Back to Sites Menu
+            return;
+        }
+    }
+}
