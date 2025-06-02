@@ -1,6 +1,6 @@
 ﻿using System.Net;
 
-namespace UniFi.Net.Models;
+namespace UniFi.Net.Network.Models;
 
 /// <summary>
 /// Represents a client connected to the system, including its identification, connection details, and access

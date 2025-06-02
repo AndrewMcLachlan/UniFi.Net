@@ -1,4 +1,4 @@
-﻿using UniFi.Net.Models;
+﻿using UniFi.Net.Network.Models;
 using static System.Console;
 
 namespace UniFi.Net.TestHarness;
@@ -53,7 +53,7 @@ public partial class App
         ReadKey();
     }
 
-    private bool PrintDeviceSelectionMenu(IReadOnlyList<UniFi.Net.Models.DeviceSummary> devices)
+    private bool PrintDeviceSelectionMenu(IReadOnlyList<UniFi.Net.Network.Models.DeviceSummary> devices)
     {
         // Obviously this will not work if there are more than 8 devices, but for simplicity, we will assume there are fewer.
         Clear();

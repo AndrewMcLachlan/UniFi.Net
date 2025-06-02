@@ -1,4 +1,4 @@
-﻿namespace UniFi.Net.Models;
+﻿namespace UniFi.Net.Network.Models;
 
 /// <summary>
 /// Represents a UniFi device with detailed information and configuration.

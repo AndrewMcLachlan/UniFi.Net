@@ -1,5 +1,5 @@
 ﻿
-namespace UniFi.Net.Models;
+namespace UniFi.Net.Network.Models;
 
 /// <summary>
 /// Represents a paged response from the UniFi API.

@@ -1,4 +1,4 @@
-﻿namespace UniFi.Net.Models;
+﻿namespace UniFi.Net.Network.Models;
 
 /// <summary>
 /// Represents the application information, including the version of the application.

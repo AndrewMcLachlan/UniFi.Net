@@ -4,7 +4,7 @@ namespace UniFi.Net.TestHarness;
 
 public partial class App
 {
-    private UniFi.Net.Models.Client? SelectedClient { get; set; } = null;
+    private UniFi.Net.Network.Models.Client? SelectedClient { get; set; } = null;
 
     private static int PrintClientsMenu()
     {
@@ -53,7 +53,7 @@ public partial class App
         ReadKey();
     }
 
-    private bool PrintClientSelectionMenu(IReadOnlyList<UniFi.Net.Models.Client> clients)
+    private bool PrintClientSelectionMenu(IReadOnlyList<UniFi.Net.Network.Models.Client> clients)
     {
         // Obviously this will not work if there are more than 8 clients, but for simplicity, we will assume there are fewer.
         Clear();
@@ -85,7 +85,7 @@ public partial class App
         return false;
     }
 
-    private static void PrintClient(UniFi.Net.Models.Client? client)
+    private static void PrintClient(UniFi.Net.Network.Models.Client? client)
     {
         if (client is null) return;
 

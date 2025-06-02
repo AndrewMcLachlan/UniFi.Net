@@ -1,4 +1,4 @@
-﻿using UniFi.Net.Models;
+﻿using UniFi.Net.Network.Models;
 
 namespace UniFi.Net;
 

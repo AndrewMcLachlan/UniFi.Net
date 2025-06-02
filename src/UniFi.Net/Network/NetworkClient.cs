@@ -1,6 +1,6 @@
 ﻿using System.Net.Http.Json;
 using System.Text.Json;
-using UniFi.Net.Models;
+using UniFi.Net.Network.Models;
 
 namespace UniFi.Net.Network;
 

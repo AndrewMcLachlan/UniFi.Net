@@ -1,4 +1,4 @@
-﻿namespace UniFi.Net.Models;
+﻿namespace UniFi.Net.Network.Models;
 
 /// <summary>
 /// Represents a site in the UniFi Network API.

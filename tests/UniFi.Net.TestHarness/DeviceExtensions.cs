@@ -1,5 +1,5 @@
 using System.Text;
-using UniFi.Net.Models;
+using UniFi.Net.Network.Models;
 using static System.Console;
 
 namespace UniFi.Net.TestHarness;
