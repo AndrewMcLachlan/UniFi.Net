@@ -28,7 +28,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="..\LICENSE" Link="LICENSE" Pack="true" PackagePath="" />
+    <Content Include="../../LICENSE" Link="LICENSE" Pack="true" PackagePath="" />
   </ItemGroup>
 
 

@@ -1,39 +1,37 @@
-﻿using Microsoft.Extensions.Options;
-using System.Collections.Generic;
-using System.Net.Http.Json;
+﻿using System.Net.Http.Json;
 using System.Text.Json;
 using UniFi.Net.Models;
 
-namespace UniFi.Net;
+namespace UniFi.Net.Network;
 
 /// <inheritdoc />
-public class UniFiClient : IUniFiClient
+public class NetworkClient : INetworkClient
 {
     private readonly IHttpClientFactory? _httpClientFactory;
     private readonly Uri? _host;
     private readonly string? _apiKey;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="UniFiClient"/> class using an <see cref="IHttpClientFactory"/>.
+    /// Initializes a new instance of the <see cref="NetworkClient"/> class using an <see cref="IHttpClientFactory"/>.
     /// </summary>
     /// <param name="httpClientFactory">The  <see cref="IHttpClientFactory"/> </param>
     /// <exception cref="ArgumentNullException">Thrown if <paramref name="httpClientFactory"/>is <see langword="null"/>.</exception>
-    public UniFiClient(IHttpClientFactory httpClientFactory)
+    public NetworkClient(IHttpClientFactory httpClientFactory)
     {
         ArgumentNullException.ThrowIfNull(httpClientFactory);
         _httpClientFactory = httpClientFactory;
     }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="UniFiClient"/> class using an <see cref="IHttpClientFactory"/>.
+    /// Initializes a new instance of the <see cref="NetworkClient"/> class using an <see cref="IHttpClientFactory"/>.
     /// </summary>
     /// <param name="host"></param>
     /// <param name="apiKey"></param>
-    /// /// <exception cref="ArgumentNullException">Thrown if <paramref name="host"/> or <paramref name="apiKey"/> is <see langword="null"/>.</exception>
-    public UniFiClient(Uri host, string apiKey)
+    /// <exception cref="ArgumentNullException">Thrown if <paramref name="host"/> or <paramref name="apiKey"/> is <see langword="null"/>.</exception>
+    public NetworkClient(Uri host, string apiKey)
     {
         ArgumentNullException.ThrowIfNull(host);
-        ArgumentNullException.ThrowIfNullOrWhiteSpace(apiKey);
+        ArgumentException.ThrowIfNullOrWhiteSpace(apiKey);
 
         _host = host;
         _apiKey = apiKey;

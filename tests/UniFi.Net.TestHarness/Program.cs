@@ -7,7 +7,7 @@ var builder = Host.CreateApplicationBuilder();
 
 builder.Configuration.AddUserSecrets<Program>(optional: true, reloadOnChange: true);
 
-builder.Services.AddUniFiClient(config => builder.Configuration.GetSection("UniFi").Bind(config));
+builder.Services.AddNetworkClient(config => builder.Configuration.GetSection("UniFi").Bind(config));
 
 builder.Services.AddHostedService<App>();
 

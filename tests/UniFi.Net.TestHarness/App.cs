@@ -3,7 +3,7 @@ using static System.Console;
 
 namespace UniFi.Net.TestHarness;
 
-public partial class App(IUniFiClient uniFiClient) : IHostedService
+public partial class App(INetworkClient uniFiClient) : IHostedService
 {
     public async Task StartAsync(CancellationToken cancellationToken)
     {

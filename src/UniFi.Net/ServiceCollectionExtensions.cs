@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Options;
 using UniFi.Net;
+using UniFi.Net.Network;
 
 namespace Microsoft.Extensions.DependencyInjection;
 
@@ -14,22 +15,19 @@ public static class ServiceCollectionExtensions
     /// <param name="services">The <see cref="IServiceCollection"/> object that this method extends.</param>
     /// <param name="configure">An action to configure the client.</param>
     /// <returns>The <see cref="IServiceCollection"/> so that calls can be chained.</returns>
-    public static IServiceCollection AddUniFiClient(this IServiceCollection services, Action<UniFiConfig> configure)
+    public static IServiceCollection AddNetworkClient(this IServiceCollection services, Action<UniFiConfig> configure)
     {
         ArgumentNullException.ThrowIfNull(services);
 
         services.Configure(configure);
 
-        services.AddHttpClient<UniFiClient>("UniFiClient", (services, client) =>
+        services.AddHttpClient<NetworkClient>("UniFiClient", (provider, client) =>
         {
-            var config = services.GetRequiredService<IOptions<UniFiConfig>>().Value;
-            client.BaseAddress = new Uri(config.Host);
-            client.DefaultRequestHeaders.Add("X-API-KEY", config.ApiKey);
-            client.DefaultRequestHeaders.Add("Accept", "application/json");
-            client.DefaultRequestHeaders.Add("User-Agent", "UniFi.Client/1.0");
+            var config = provider.GetRequiredService<IOptions<UniFiConfig>>().Value;
+            HttpClientConfigurator.ConfigureHttpClient(client, new Uri(config.Host), config.ApiKey);
         });
 
-        services.AddSingleton<IUniFiClient, UniFiClient>();
+        services.AddSingleton<INetworkClient, NetworkClient>();
 
         return services;
     }

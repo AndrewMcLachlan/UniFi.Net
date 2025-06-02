@@ -5,7 +5,7 @@ namespace UniFi.Net;
 /// <summary>
 /// The UniFi Client.
 /// </summary>
-public interface IUniFiClient
+public interface INetworkClient
 {
     /// <summary>
     /// Gets the application information.
