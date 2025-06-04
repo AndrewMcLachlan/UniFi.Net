@@ -127,10 +127,10 @@ public class NetworkClient : INetworkClient
             return client;
         }
 
-        client = _httpClientFactory.CreateClient("UniFiClient");
+        client = _httpClientFactory.CreateClient("NetworkClient");
         if (client.BaseAddress == null)
         {
-            throw new InvalidOperationException("Base address is not set for UniFiClient.");
+            throw new InvalidOperationException("Base address is not set for NetworkClient.");
         }
         return client;
     }

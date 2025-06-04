@@ -1,8 +1,8 @@
 ﻿using static System.Console;
 
-namespace UniFi.Net.TestHarness;
+namespace UniFi.Net.TestHarness.Network;
 
-public partial class App
+public partial class NetworkClient
 {
     private UniFi.Net.Network.Models.Client? SelectedClient { get; set; } = null;
 

@@ -6,7 +6,7 @@ internal static class HttpClientConfigurator
         client.BaseAddress = host;
         client.DefaultRequestHeaders.Add("X-API-KEY", apiKey);
         client.DefaultRequestHeaders.Add("Accept", "application/json");
-        client.DefaultRequestHeaders.Add("User-Agent", "UniFi.Client/1.0");
+        client.DefaultRequestHeaders.Add("User-Agent", "UniFi.Net/1.0");
 
         return client;
     }

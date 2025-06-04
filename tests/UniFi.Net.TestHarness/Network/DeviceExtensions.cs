@@ -2,7 +2,7 @@ using System.Text;
 using UniFi.Net.Network.Models;
 using static System.Console;
 
-namespace UniFi.Net.TestHarness;
+namespace UniFi.Net.TestHarness.Network;
 public static class DeviceExtensions
 {
     public static void PrettyPrint(this DeviceSummary device)

@@ -1,6 +1,6 @@
 ﻿namespace UniFi.Net.SiteManager.Models;
 
-public abstract record HostWithDevices(
+public record HostWithDevices(
     string HostId,
     string HostName,
     IReadOnlyList<Device> Devices,

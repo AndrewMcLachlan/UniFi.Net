@@ -1,8 +1,9 @@
 ﻿using UniFi.Net.Network.Models;
 using static System.Console;
 
-namespace UniFi.Net.TestHarness;
-public partial class App
+namespace UniFi.Net.TestHarness.Network;
+
+public partial class NetworkClient
 {
     private Site? SelectedSite { get; set; } = null;
 
