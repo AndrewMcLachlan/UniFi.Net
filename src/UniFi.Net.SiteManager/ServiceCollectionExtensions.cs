@@ -15,7 +15,7 @@ public static class ServiceCollectionExtensions
     /// <param name="services">The <see cref="IServiceCollection"/> object that this method extends.</param>
     /// <param name="configure">An action to configure the client.</param>
     /// <returns>The <see cref="IServiceCollection"/> so that calls can be chained.</returns>
-    public static IServiceCollection AddSiteManagerClient(this IServiceCollection services, Action<UniFiSiteManagerConfig> configure)
+    public static IServiceCollection AddUniFiSiteManagerClient(this IServiceCollection services, Action<UniFiSiteManagerConfig> configure)
     {
         ArgumentNullException.ThrowIfNull(services);
 

@@ -1,4 +1,5 @@
-﻿using static System.Console;
+﻿using UniFi.Net.Network;
+using static System.Console;
 
 namespace UniFi.Net.TestHarness.Network;
 

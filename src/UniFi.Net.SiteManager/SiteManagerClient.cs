@@ -31,6 +31,19 @@ public class SiteManagerClient : ISiteManagerClient
     /// <summary>
     /// Initializes a new instance of the <see cref="SiteManagerClient"/> class using an <see cref="IHttpClientFactory"/>.
     /// </summary>
+    /// <param name="apiKey"></param>
+    /// <exception cref="ArgumentNullException">Thrown if <paramref name="apiKey"/> is <see langword="null"/>.</exception>
+    public SiteManagerClient(string apiKey)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(apiKey);
+
+        _host = new Uri("https://api.ui.com");
+        _apiKey = apiKey;
+    }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="SiteManagerClient"/> class using an <see cref="IHttpClientFactory"/>.
+    /// </summary>
     /// <param name="host"></param>
     /// <param name="apiKey"></param>
     /// <exception cref="ArgumentNullException">Thrown if <paramref name="host"/> or <paramref name="apiKey"/> is <see langword="null"/>.</exception>

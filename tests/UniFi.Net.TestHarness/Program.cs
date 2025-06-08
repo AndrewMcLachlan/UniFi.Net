@@ -1,5 +1,4 @@
-﻿using Azure.Extensions.AspNetCore.Configuration.Secrets;
-using Azure.Identity;
+﻿using Azure.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -18,8 +17,8 @@ if (keyVault is not null)
     builder.Configuration.AddAzureKeyVault(keyVault, new DefaultAzureCredential());
 }
 
-builder.Services.AddNetworkClient(config => builder.Configuration.GetSection("UniFi:Network").Bind(config));
-builder.Services.AddSiteManagerClient(config => builder.Configuration.GetSection("UniFi:SiteManager").Bind(config));
+builder.Services.AddUniFiNetworkClient(config => builder.Configuration.GetSection("UniFi:Network").Bind(config));
+builder.Services.AddUniFiSiteManagerClient(config => builder.Configuration.GetSection("UniFi:SiteManager").Bind(config));
 
 builder.Services.AddSingleton<NetworkClient>();
 builder.Services.AddSingleton<SiteManagerClient>();

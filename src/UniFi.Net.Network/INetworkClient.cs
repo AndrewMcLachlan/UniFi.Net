@@ -1,6 +1,6 @@
 ﻿using UniFi.Net.Network.Models;
 
-namespace UniFi.Net;
+namespace UniFi.Net.Network;
 
 /// <summary>
 /// The UniFi Client.
