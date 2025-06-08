@@ -40,7 +40,7 @@ internal class App(NetworkClient networkClient, SiteManagerClient siteManagerCli
         return Task.CompletedTask;
     }
 
-    private int PrintMenu()
+    private static int PrintMenu()
     {
         Clear();
         WriteLine("UniFi Client Test Harness");

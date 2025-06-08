@@ -1,6 +1,5 @@
 ﻿using UniFi.Net.SiteManager;
 using UniFi.Net.SiteManager.Models;
-using static System.Console;
 
 namespace UniFi.Net.TestHarness.SiteManager;
 
@@ -23,20 +22,14 @@ internal partial class SiteManagerClient(ISiteManagerClient client)
         }
     }
 
-    private Task DoAction((int Primary, int? Secondary) action, CancellationToken cancellationToken)
-    {
-        switch (action.Primary)
+    private Task DoAction((int Primary, int? Secondary) action, CancellationToken cancellationToken) =>
+        action.Primary switch
         {
-            case 1:
-                return DoHosts(action.Secondary, cancellationToken);
-            case 2:
-                return DoSites(cancellationToken);
-            case 3:
-                return DoDevices(cancellationToken);
-            default:
-                return Task.CompletedTask;
-        }
-    }
+            1 => DoHosts(action.Secondary, cancellationToken),
+            2 => DoSites(cancellationToken),
+            3 => DoDevices(cancellationToken),
+            _ => Task.CompletedTask,
+        };
 
     private (int Primary, int? Secondary) PrintMenu()
     {

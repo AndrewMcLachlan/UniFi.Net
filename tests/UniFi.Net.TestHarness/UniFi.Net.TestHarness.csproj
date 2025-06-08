@@ -26,12 +26,14 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\UniFi.Net\UniFi.Net.csproj" />
+    <ProjectReference Include="..\..\src\UniFi.Net.Access\UniFi.Net.Access.csproj" />
+    <ProjectReference Include="..\..\src\UniFi.Net.Network\UniFi.Net.Network.csproj" />
+    <ProjectReference Include="..\..\src\UniFi.Net.SiteManager\UniFi.Net.SiteManager.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <Using Include="System.Console" Static="true"/>
-    <Using Include="UniFi.Net.TestHarness.ConsoleExtensions" Static="true"/>
+    <Using Include="System.Console" Static="true" />
+    <Using Include="UniFi.Net.TestHarness.ConsoleExtensions" Static="true" />
   </ItemGroup>
 
 </Project>
