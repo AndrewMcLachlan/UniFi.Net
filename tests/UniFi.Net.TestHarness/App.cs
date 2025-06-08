@@ -1,56 +1,38 @@
 ﻿using Microsoft.Extensions.Hosting;
-using static System.Console;
+using UniFi.Net.TestHarness.Network;
+using UniFi.Net.TestHarness.SiteManager;
 
 namespace UniFi.Net.TestHarness;
 
-public partial class App(IUniFiClient uniFiClient) : IHostedService
+internal class App(NetworkClient networkClient, SiteManagerClient siteManagerClient) : IHostedService
 {
     public async Task StartAsync(CancellationToken cancellationToken)
     {
-        var sites = await uniFiClient.ListSites(cancellationToken: cancellationToken);
+        int action = 0;
 
-        SelectedSite = sites.Data.Count > 0 ? sites.Data[0] : null;
-
-        (int Primary, int? Secondary) action = (0, null);
-        while (action.Primary >= 0 && !cancellationToken.IsCancellationRequested)
+        while (action >= 0 && !cancellationToken.IsCancellationRequested)
         {
             action = PrintMenu();
 
-            await DoAction(action, cancellationToken);
+            switch (action)
+            {
+                case 1:
+                    await networkClient.StartAsync(cancellationToken);
+                    break;
+                case 2:
+                    await siteManagerClient.StartAsync(cancellationToken);
+                    break;
+                case 3:
+                    WriteLine("Access API is not implemented yet.");
+                    break;
+                case 4:
+                    Environment.Exit(0);
+                    break;
+                default:
+                    WriteLine("Invalid option, please try again.");
+                    continue;
+            }
         }
-    }
-
-    private async Task DoAction((int Primary, int? Secondary) action, CancellationToken cancellationToken)
-    {
-        switch (action.Primary)
-        {
-            case 1:
-                await DoInfo(cancellationToken);
-                break;
-            case 2:
-                await DoSites(action.Secondary!.Value, cancellationToken);
-                break;
-            case 3:
-                await DoDevices(action.Secondary!.Value, cancellationToken);
-                break;
-            case 4:
-                await DoClients(action.Secondary!.Value, cancellationToken);
-                break;
-            case 5:
-                Environment.Exit(0);
-                break;
-            default:
-                WriteLine("Invalid option, please try again.");
-                break;
-        }
-    }
-
-    private async Task DoInfo(CancellationToken cancellationToken)
-    {
-        var info = await uniFiClient.GetApplicationInfo(cancellationToken);
-        WriteLine(info);
-        WriteLine("Press any key to return to the main menu...");
-        ReadKey();
     }
 
     public Task StopAsync(CancellationToken cancellationToken)
@@ -58,54 +40,26 @@ public partial class App(IUniFiClient uniFiClient) : IHostedService
         return Task.CompletedTask;
     }
 
-    private (int, int?) PrintMenu()
+    private static int PrintMenu()
     {
         Clear();
-        WriteLine("Unifi Client Test Harness");
+        WriteLine("UniFi Client Test Harness");
         WriteLine("-------------------------");
-        if (SelectedSite is not null)
-        {
-            WriteLine($"Current site is ${SelectedSite.Name}");
-            WriteLine("-------------------------");
-        }
-        if (SelectedDevice is not null)
-        {
-            WriteLine($"Current device is ${SelectedDevice.Name}");
-            WriteLine("-------------------------");
-        }
-        if (SelectedClient is not null)
-        {
-            WriteLine($"Current client is ${SelectedClient.Name}");
-            WriteLine("-------------------------");
-        }
-        WriteLine("1. Info");
-        WriteLine("2. Sites");
-        WriteLine("3. Devices");
-        WriteLine("4. Clients");
-        WriteLine("5. Exit");
-        Write("\nSelect an option: ");
+        WriteLine("Choose your API");
+        WriteLine("1. Network API");
+        WriteLine("2. Site Manager API");
+        WriteLine("3. Access API ");
+        WriteLine("4. Exit");
+        Write("Select an option: ");
 
         var input = ReadKey();
-        WriteLine();
 
-        return input.KeyChar switch
+        if (!Int32.TryParse(input.KeyChar.ToString(), out var option) || option > 2)
         {
-            '1' => (1, null),
-            '2' => (2, PrintSitesMenu()), // List Devices
-            '3' => (3, PrintDevicesMenu()), // Get Device Details
-            '4' => (4, PrintClientsMenu()), // List Clients
-            '5' => (5, null), // Exit
-            _ => PrintMenu() // Invalid input, show menu again
-        };
-    }
+            WriteLine("Invalid option, please try again.");
+            return -1;
 
-    private bool SelectedSiteCheck()
-    {
-        if (SelectedSite == null)
-        {
-            WriteLine("No site selected. Please select a site first.");
-            return false;
         }
-        return true;
+        return option;
     }
 }

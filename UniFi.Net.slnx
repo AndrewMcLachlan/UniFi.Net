@@ -4,6 +4,8 @@
     <File Path="LICENSE" />
     <File Path="README.md" />
   </Folder>
-  <Project Path="src/UniFi.Net/UniFi.Net.csproj" />
+  <Project Path="src/UniFi.Net.Access/UniFi.Net.Access.csproj" />
+  <Project Path="src/UniFi.Net.Network/UniFi.Net.Network.csproj" />
+  <Project Path="src/UniFi.Net.SiteManager/UniFi.Net.SiteManager.csproj" />
   <Project Path="tests/UniFi.Net.TestHarness/UniFi.Net.TestHarness.csproj" />
 </Solution>
