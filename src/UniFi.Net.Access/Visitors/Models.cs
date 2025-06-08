@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace UniFi.Net.Access.Visitors;
+﻿namespace UniFi.Net.Access.Visitors;
 
 /// <summary>
 /// Represents a summary of visitor details.
