@@ -70,6 +70,30 @@ public class NetworkClient : INetworkClient
     }
 
     /// <inheritdoc />
+    public Task ExecutePortAction(int portIdx, Guid siteId, Guid deviceId, PortAction action, CancellationToken cancellationToken = default)
+    {
+        string path = $"v1/sites/{siteId}/devices/{deviceId}/ports/{portIdx}/actions";
+        var request = new HttpRequestMessage(HttpMethod.Post, path)
+        {
+            Content = JsonContent.Create(new { action })
+        };
+
+        return SendAsync(request, cancellationToken);
+    }
+
+    /// <inheritdoc />
+    public Task ExecuteDeviceAction(Guid siteId, Guid deviceId, DeviceAction action, CancellationToken cancellationToken = default)
+    {
+        string path = $"v1/sites/{siteId}/devices/{deviceId}/actions";
+        var request = new HttpRequestMessage(HttpMethod.Post, path)
+        {
+            Content = JsonContent.Create(new { action })
+        };
+
+        return SendAsync(request, cancellationToken);
+    }
+
+    /// <inheritdoc />
     public Task<PagedResponse<Client>> ListClients(Guid siteId, string? filter = null, int? offset = null, int? limit = null, CancellationToken cancellationToken = default)
     {
         string path = $"proxy/network/integration/v1/sites/{siteId}/clients";
@@ -85,6 +109,26 @@ public class NetworkClient : INetworkClient
         string path = $"proxy/network/integration/v1/sites/{siteId}/clients/{clientId}";
 
         return GetFromJsonAsync<Client>(path, cancellationToken);
+    }
+
+    /// <inheritdoc />
+    public Task<ExecuteClientActionResponse> ExecuteClientAction(Guid siteId, Guid clientId, ClientAction action, long? timeLimitMinutes = null, long? dataUsageLimitMBytes = null, long? rxRateLimitKbps = null, long? txRateLimitKbps = null, CancellationToken cancellationToken = default)
+    {
+        string path = $"proxy/network/integration/v1/sites/{siteId}/clients/{clientId}/actions";
+        var requestBody = new
+        {
+            action,
+            timeLimitMinutes,
+            dataUsageLimitMBytes,
+            rxRateLimitKbps,
+            txRateLimitKbps
+        };
+        var request = new HttpRequestMessage(HttpMethod.Post, path)
+        {
+            Content = JsonContent.Create(requestBody)
+        };
+
+        return SendAsync<ExecuteClientActionResponse>(request, cancellationToken);
     }
 
     private async Task<T> GetFromJsonAsync<T>(string requestUri, CancellationToken cancellationToken = default)
@@ -113,6 +157,50 @@ public class NetworkClient : INetworkClient
         catch (JsonException ex)
         {
             throw new InvalidOperationException($"Error deserializing response from {requestUri}: {ex.Message}", ex);
+        }
+    }
+
+    private async Task<T> SendAsync<T>(HttpRequestMessage request, CancellationToken cancellationToken = default)
+    {
+        using var client = GetClient();
+        try
+        {
+            var responseMessage = await client.SendAsync(request, cancellationToken) ??
+                   throw new InvalidOperationException($"Failed to deserialize response from {request.RequestUri}.");
+            responseMessage.EnsureSuccessStatusCode();
+            var result = await responseMessage.Content.ReadFromJsonAsync<T>(cancellationToken: cancellationToken);
+            return result ?? throw new InvalidOperationException($"Failed to deserialize response from {request.RequestUri}.");
+        }
+        catch (HttpRequestException ex)
+        {
+            throw new InvalidOperationException($"Error fetching data from {request.RequestUri}: {ex.Message}", ex);
+        }
+        catch (NotSupportedException ex)
+        {
+            throw new InvalidOperationException($"The content type is not supported for {request.RequestUri}: {ex.Message}", ex);
+        }
+        catch (JsonException ex)
+        {
+            throw new InvalidOperationException($"Error deserializing response from {request.RequestUri}: {ex.Message}", ex);
+        }
+    }
+
+    private async Task SendAsync(HttpRequestMessage request, CancellationToken cancellationToken = default)
+    {
+        using var client = GetClient();
+        try
+        {
+            var responseMessage = await client.SendAsync(request, cancellationToken) ??
+                   throw new InvalidOperationException($"Failed to deserialize response from {request.RequestUri}.");
+            responseMessage.EnsureSuccessStatusCode();
+        }
+        catch (HttpRequestException ex)
+        {
+            throw new InvalidOperationException($"Error fetching data from {request.RequestUri}: {ex.Message}", ex);
+        }
+        catch (NotSupportedException ex)
+        {
+            throw new InvalidOperationException($"The content type is not supported for {request.RequestUri}: {ex.Message}", ex);
         }
     }
 

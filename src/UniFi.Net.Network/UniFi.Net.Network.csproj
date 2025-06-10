@@ -38,4 +38,7 @@
     <PackageReference Include="Microsoft.Extensions.Options" Version="9.0.5" />
   </ItemGroup>
 
+
+  <Import Project="..\UniFi.Net.Core\UniFi.Net.Core.projitems" Label="Shared" />
+
 </Project>
