@@ -28,7 +28,7 @@ public class VisitorClient : ClientBase, IVisitorClient
     /// <inheritdoc />
     public async Task RegisterVisitorAsync(string firstName, string lastName, string? email = null, string? phone = null, CancellationToken cancellationToken = default)
     {
-        using var httpClient = GetClient();
+        var httpClient = GetClient();
 
         var payload = new
         {
@@ -48,7 +48,7 @@ public class VisitorClient : ClientBase, IVisitorClient
     /// <inheritdoc />
     public async Task<VisitorDetails> FetchVisitorAsync(string visitorId, CancellationToken cancellationToken = default)
     {
-        using var httpClient = GetClient();
+        var httpClient = GetClient();
 
         var response = await httpClient.GetAsync($"/api/v1/developer/visitors/{visitorId}", cancellationToken);
 
@@ -61,7 +61,7 @@ public class VisitorClient : ClientBase, IVisitorClient
     /// <inheritdoc />
     public async Task<List<VisitorSummary>> FetchAllVisitorsAsync(int? pageNum = null, int? pageSize = null, CancellationToken cancellationToken = default)
     {
-        using var httpClient = GetClient();
+        var httpClient = GetClient();
 
         var query = new List<string>();
         if (pageNum.HasValue) query.Add($"page_num={pageNum.Value}");
@@ -79,7 +79,7 @@ public class VisitorClient : ClientBase, IVisitorClient
     /// <inheritdoc />
     public async Task DeleteVisitorAsync(string visitorId, CancellationToken cancellationToken = default)
     {
-        using var httpClient = GetClient();
+        var httpClient = GetClient();
 
         var response = await httpClient.DeleteAsync($"/api/v1/developer/visitors/{visitorId}", cancellationToken);
 

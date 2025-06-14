@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Primitives;
+﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Primitives;
 using System.Net.Http.Json;
 using System.Text.Json;
 using UniFi.Net.SiteManager.Models;
@@ -10,9 +11,7 @@ namespace UniFi.Net.SiteManager;
 /// </summary>
 public class SiteManagerClient : ISiteManagerClient
 {
-    private readonly IHttpClientFactory? _httpClientFactory;
-    private readonly Uri? _host;
-    private readonly string? _apiKey;
+    private readonly IHttpClientFactory _httpClientFactory;
 
     private const string Version = "v1";
     private const string EarlyAccess = "ea";
@@ -37,8 +36,7 @@ public class SiteManagerClient : ISiteManagerClient
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(apiKey);
 
-        _host = new Uri("https://api.ui.com");
-        _apiKey = apiKey;
+        _httpClientFactory = CreateFactory(new Uri("https://api.ui.com"), apiKey);
     }
 
     /// <summary>
@@ -52,8 +50,7 @@ public class SiteManagerClient : ISiteManagerClient
         ArgumentNullException.ThrowIfNull(host);
         ArgumentException.ThrowIfNullOrWhiteSpace(apiKey);
 
-        _host = host;
-        _apiKey = apiKey;
+        _httpClientFactory = CreateFactory(host, apiKey);
     }
 
     /// <inheritdoc/>
@@ -169,12 +166,12 @@ public class SiteManagerClient : ISiteManagerClient
 
     private async Task<T> GetFromJsonAsync<T>(string requestUri, CancellationToken cancellationToken = default)
     {
-        using var client = GetClient();
+        var client = GetClient();
 
         try
         {
             var responseMessage = await client.GetAsync(requestUri, cancellationToken) ??
-                   throw new InvalidOperationException($"Failed to deserialize response from {requestUri}.");
+                throw new InvalidOperationException($"Failed to deserialize response from {requestUri}.");
 
             responseMessage.EnsureSuccessStatusCode();
 
@@ -200,7 +197,7 @@ public class SiteManagerClient : ISiteManagerClient
 
     private async Task<TResponse> PostJsonAsync<TRequest, TResponse>(string requestUri, TRequest body, CancellationToken cancellationToken = default)
     {
-        using var client = GetClient();
+        var client = GetClient();
 
         try
         {
@@ -231,13 +228,6 @@ public class SiteManagerClient : ISiteManagerClient
     {
         HttpClient client;
 
-        if (_httpClientFactory == null)
-        {
-            client = new HttpClient();
-            HttpClientConfigurator.ConfigureHttpClient(client, _host!, _apiKey!);
-            return client;
-        }
-
         client = _httpClientFactory.CreateClient("SiteManagerClient");
         if (client.BaseAddress == null)
         {
@@ -255,5 +245,17 @@ public class SiteManagerClient : ISiteManagerClient
         var query = String.Join("&", queryParams.Where(kvp => !String.IsNullOrWhiteSpace(kvp.Key) && !String.IsNullOrWhiteSpace(queryParams[kvp.Key]))
             .SelectMany(kvp => queryParams[kvp.Key].Where(v => !String.IsNullOrWhiteSpace(v)).Select(v => $"{kvp.Key}={Uri.EscapeDataString(v!)}")));
         return "?" + query;
+    }
+
+    private static IHttpClientFactory CreateFactory(Uri host, string apiKey)
+    {
+        // Manually create an IHttpClientFactory for on-demand HttpClient creation
+        var services = new ServiceCollection();
+        services.AddHttpClient<SiteManagerClient>("SiteManagerClient", (provider, client) =>
+        {
+            HttpClientConfigurator.ConfigureHttpClient(client, host, apiKey);
+        });
+        var serviceProvider = services.BuildServiceProvider();
+        return serviceProvider.GetRequiredService<IHttpClientFactory>();
     }
 }

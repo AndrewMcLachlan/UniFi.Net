@@ -28,7 +28,7 @@ public class UniFiIdentityClient : ClientBase, IUniFiIdentityClient
     /// <inheritdoc />
     public async Task SendIdentityInvitationsAsync(List<IdentityInvitation> invitations, CancellationToken cancellationToken = default)
     {
-        using var httpClient = GetClient();
+        var httpClient = GetClient();
 
         var payload = invitations.Select(invitation => new
         {
@@ -45,7 +45,7 @@ public class UniFiIdentityClient : ClientBase, IUniFiIdentityClient
     /// <inheritdoc />
     public async Task<List<IdentityResource>> FetchAvailableResourcesAsync(string? resourceType = null, CancellationToken cancellationToken = default)
     {
-        using var httpClient = GetClient();
+        var httpClient = GetClient();
 
         var query = string.IsNullOrEmpty(resourceType) ? string.Empty : $"?resource_type={resourceType}";
         var response = await httpClient.GetAsync($"/api/v1/developer/users/identity/assignments{query}", cancellationToken);
@@ -59,7 +59,7 @@ public class UniFiIdentityClient : ClientBase, IUniFiIdentityClient
     /// <inheritdoc />
     public async Task AssignResourcesToUserAsync(string userId, string resourceType, List<string> resourceIds, CancellationToken cancellationToken = default)
     {
-        using var httpClient = GetClient();
+        var httpClient = GetClient();
 
         var payload = new
         {
@@ -76,7 +76,7 @@ public class UniFiIdentityClient : ClientBase, IUniFiIdentityClient
     /// <inheritdoc />
     public async Task<List<IdentityResource>> FetchResourcesAssignedToUserAsync(string userId, CancellationToken cancellationToken = default)
     {
-        using var httpClient = GetClient();
+        var httpClient = GetClient();
 
         var response = await httpClient.GetAsync($"/api/v1/developer/users/{userId}/identity/assignments", cancellationToken);
 
@@ -89,7 +89,7 @@ public class UniFiIdentityClient : ClientBase, IUniFiIdentityClient
     /// <inheritdoc />
     public async Task AssignResourcesToUserGroupAsync(string groupId, string resourceType, List<string> resourceIds, CancellationToken cancellationToken = default)
     {
-        using var httpClient = GetClient();
+        var httpClient = GetClient();
 
         var payload = new
         {
@@ -106,7 +106,7 @@ public class UniFiIdentityClient : ClientBase, IUniFiIdentityClient
     /// <inheritdoc />
     public async Task<List<IdentityResource>> FetchResourcesAssignedToUserGroupAsync(string groupId, CancellationToken cancellationToken = default)
     {
-        using var httpClient = GetClient();
+        var httpClient = GetClient();
 
         var response = await httpClient.GetAsync($"/api/v1/developer/user_groups/{groupId}/identity/assignments", cancellationToken);
 

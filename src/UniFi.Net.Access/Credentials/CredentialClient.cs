@@ -28,7 +28,7 @@ public class CredentialClient : ClientBase, ICredentialClient
     /// <inheritdoc/>
     public async Task<string> GeneratePinCodeAsync(CancellationToken cancellationToken = default)
     {
-        using var httpClient = GetClient();
+        var httpClient = GetClient();
 
         var response = await httpClient.PostAsync("/api/v1/developer/credentials/pin_codes", null, cancellationToken);
 
@@ -41,7 +41,7 @@ public class CredentialClient : ClientBase, ICredentialClient
     /// <inheritdoc/>
     public async Task EnrolNfcCardAsync(string deviceId, CancellationToken cancellationToken = default)
     {
-        using var httpClient = GetClient();
+        var httpClient = GetClient();
 
         var payload = new { device_id = deviceId };
 
@@ -54,7 +54,7 @@ public class CredentialClient : ClientBase, ICredentialClient
     /// <inheritdoc/>
     public async Task<NfcCardDetails> FetchNfcCardAsync(string cardToken, CancellationToken cancellationToken = default)
     {
-        using var httpClient = GetClient();
+        var httpClient = GetClient();
 
         var response = await httpClient.GetAsync($"/api/v1/developer/credentials/nfc_cards/{cardToken}", cancellationToken);
 
@@ -67,7 +67,7 @@ public class CredentialClient : ClientBase, ICredentialClient
     /// <inheritdoc/>
     public async Task<List<NfcCardSummary>> FetchAllNfcCardsAsync(int? pageNum = null, int? pageSize = null, CancellationToken cancellationToken = default)
     {
-        using var httpClient = GetClient();
+        var httpClient = GetClient();
 
         var query = new List<string>();
         if (pageNum.HasValue) query.Add($"page_num={pageNum.Value}");
@@ -85,7 +85,7 @@ public class CredentialClient : ClientBase, ICredentialClient
     /// <inheritdoc/>
     public async Task DeleteNfcCardAsync(string cardToken, CancellationToken cancellationToken = default)
     {
-        using var httpClient = GetClient();
+        var httpClient = GetClient();
 
         var response = await httpClient.DeleteAsync($"/api/v1/developer/credentials/nfc_cards/{cardToken}", cancellationToken);
 

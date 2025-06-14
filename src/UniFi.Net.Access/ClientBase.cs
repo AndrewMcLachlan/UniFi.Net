@@ -1,13 +1,13 @@
-﻿namespace UniFi.Net.Access;
+﻿using Microsoft.Extensions.DependencyInjection;
+
+namespace UniFi.Net.Access;
 
 /// <summary>
 /// Base class for UniFi Access clients.
 /// </summary>
 public abstract class ClientBase
 {
-    private readonly IHttpClientFactory? _httpClientFactory;
-    private readonly Uri? _host;
-    private readonly string? _apiKey;
+    private readonly IHttpClientFactory _httpClientFactory;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ClientBase"/> class using an <see cref="IHttpClientFactory"/>.
@@ -31,8 +31,13 @@ public abstract class ClientBase
         ArgumentNullException.ThrowIfNull(host);
         ArgumentException.ThrowIfNullOrWhiteSpace(apiKey);
 
-        _host = host;
-        _apiKey = apiKey;
+        var services = new ServiceCollection();
+        services.AddHttpClient<ClientBase>("AccessClient", (provider, client) =>
+        {
+            HttpClientConfigurator.ConfigureHttpClient(client, host, apiKey);
+        });
+        var serviceProvider = services.BuildServiceProvider();
+        _httpClientFactory = serviceProvider.GetRequiredService<IHttpClientFactory>();
     }
 
     /// <summary>
@@ -43,13 +48,6 @@ public abstract class ClientBase
     protected HttpClient GetClient()
     {
         HttpClient client;
-
-        if (_httpClientFactory == null)
-        {
-            client = new HttpClient();
-            HttpClientConfigurator.ConfigureHttpClient(client, _host!, _apiKey!);
-            return client;
-        }
 
         client = _httpClientFactory.CreateClient("AccessClient");
         if (client.BaseAddress == null)

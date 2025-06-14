@@ -1,4 +1,5 @@
-﻿using System.Net.Http.Json;
+﻿using Microsoft.Extensions.DependencyInjection;
+using System.Net.Http.Json;
 using System.Text.Json;
 using UniFi.Net.Network.Models;
 
@@ -7,9 +8,7 @@ namespace UniFi.Net.Network;
 /// <inheritdoc />
 public class NetworkClient : INetworkClient
 {
-    private readonly IHttpClientFactory? _httpClientFactory;
-    private readonly Uri? _host;
-    private readonly string? _apiKey;
+    private readonly IHttpClientFactory _httpClientFactory;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="NetworkClient"/> class using an <see cref="IHttpClientFactory"/>.
@@ -33,8 +32,15 @@ public class NetworkClient : INetworkClient
         ArgumentNullException.ThrowIfNull(host);
         ArgumentException.ThrowIfNullOrWhiteSpace(apiKey);
 
-        _host = host;
-        _apiKey = apiKey;
+        // Manually create an IHttpClientFactory for on-demand HttpClient creation
+        var services = new ServiceCollection();
+        services.AddHttpClient<NetworkClient>("NetworkClient", (provider, client) =>
+        {
+            HttpClientConfigurator.ConfigureHttpClient(client, host, apiKey);
+        });
+        var serviceProvider = services.BuildServiceProvider();
+        _httpClientFactory = serviceProvider.GetRequiredService<IHttpClientFactory>();
+
     }
 
     /// <inheritdoc />
@@ -133,7 +139,7 @@ public class NetworkClient : INetworkClient
 
     private async Task<T> GetFromJsonAsync<T>(string requestUri, CancellationToken cancellationToken = default)
     {
-        using var client = GetClient();
+        var client = GetClient();
 
         try
         {
@@ -162,7 +168,7 @@ public class NetworkClient : INetworkClient
 
     private async Task<T> SendAsync<T>(HttpRequestMessage request, CancellationToken cancellationToken = default)
     {
-        using var client = GetClient();
+        var client = GetClient();
         try
         {
             var responseMessage = await client.SendAsync(request, cancellationToken);
@@ -186,7 +192,7 @@ public class NetworkClient : INetworkClient
 
     private async Task SendAsync(HttpRequestMessage request, CancellationToken cancellationToken = default)
     {
-        using var client = GetClient();
+        var client = GetClient();
         try
         {
             var responseMessage = await client.SendAsync(request, cancellationToken);
@@ -205,13 +211,6 @@ public class NetworkClient : INetworkClient
     private HttpClient GetClient()
     {
         HttpClient client;
-
-        if (_httpClientFactory == null)
-        {
-            client = new HttpClient();
-            HttpClientConfigurator.ConfigureHttpClient(client, _host!, _apiKey!);
-            return client;
-        }
 
         client = _httpClientFactory.CreateClient("NetworkClient");
         if (client.BaseAddress == null)

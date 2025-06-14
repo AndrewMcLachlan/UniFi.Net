@@ -29,7 +29,7 @@ public class UserClient : ClientBase, IUserClient
     /// <inheritdoc />
     public async Task RegisterUserAsync(string firstName, string lastName, string? email = null, string? employeeNumber = null, CancellationToken cancellationToken = default)
     {
-        using var httpClient = GetClient();
+        var httpClient = GetClient();
 
         var payload = new
         {
@@ -48,7 +48,7 @@ public class UserClient : ClientBase, IUserClient
     /// <inheritdoc />
     public async Task<UserDetails> FetchUserAsync(string userId, CancellationToken cancellationToken = default)
     {
-        using var httpClient = GetClient();
+        var httpClient = GetClient();
 
         var response = await httpClient.GetAsync($"/api/v1/developer/users/{userId}", cancellationToken);
 
@@ -61,7 +61,7 @@ public class UserClient : ClientBase, IUserClient
     /// <inheritdoc />
     public async Task<List<UserSummary>> FetchAllUsersAsync(int? pageNum = null, int? pageSize = null, CancellationToken cancellationToken = default)
     {
-        using var httpClient = GetClient();
+        var httpClient = GetClient();
 
         var query = new List<string>();
         if (pageNum.HasValue) query.Add($"page_num={pageNum.Value}");
@@ -79,7 +79,7 @@ public class UserClient : ClientBase, IUserClient
     /// <inheritdoc />
     public async Task DeleteUserAsync(string userId, CancellationToken cancellationToken = default)
     {
-        using var httpClient = GetClient();
+        var httpClient = GetClient();
 
         var response = await httpClient.DeleteAsync($"/api/v1/developer/users/{userId}", cancellationToken);
 
