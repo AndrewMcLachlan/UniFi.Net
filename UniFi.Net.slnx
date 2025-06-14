@@ -1,4 +1,7 @@
 <Solution>
+  <Folder Name="/.github/">
+    <File Path=".github/workflows/network-ci.yml" />
+  </Folder>
   <Folder Name="/Solution Items/">
     <File Path=".editorconfig" />
     <File Path="LICENSE" />
