@@ -24,12 +24,14 @@ internal class App(NetworkClient networkClient, SiteManagerClient siteManagerCli
                     break;
                 case 3:
                     WriteLine("Access API is not implemented yet.");
+                    ReadKey();
                     break;
                 case 4:
                     Environment.Exit(0);
                     break;
                 default:
                     WriteLine("Invalid option, please try again.");
+                    ReadKey();
                     continue;
             }
         }
@@ -54,12 +56,15 @@ internal class App(NetworkClient networkClient, SiteManagerClient siteManagerCli
 
         var input = ReadKey();
 
-        if (!Int32.TryParse(input.KeyChar.ToString(), out var option) || option > 2)
+        WriteLine();
+
+        if (!Int32.TryParse(input.KeyChar.ToString(), out var option) || option > 4)
         {
             WriteLine("Invalid option, please try again.");
             return -1;
 
         }
+
         return option;
     }
 }

@@ -28,7 +28,7 @@ public class SystemLogClient : ClientBase, ISystemLogClient
     /// <inheritdoc />
     public async Task<List<SystemLogEntry>> FetchSystemLogsAsync(string topic, long? since = null, long? until = null, string? actorId = null, CancellationToken cancellationToken = default)
     {
-        using var httpClient = GetClient();
+        var httpClient = GetClient();
 
         var payload = new
         {
@@ -50,7 +50,7 @@ public class SystemLogClient : ClientBase, ISystemLogClient
     /// <inheritdoc />
     public async Task<byte[]> ExportSystemLogsAsync(string topic, long since, long until, string timeZone, CancellationToken cancellationToken = default)
     {
-        using var httpClient = GetClient();
+        var httpClient = GetClient();
 
         var payload = new
         {

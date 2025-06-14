@@ -28,7 +28,7 @@ public class AccessPolicyClient : ClientBase, IAccessPolicyClient
     /// <inheritdoc/>
     public async Task<List<AccessPolicySummary>> FetchAllAccessPoliciesAsync(CancellationToken cancellationToken = default)
     {
-        using var httpClient = GetClient();
+        var httpClient = GetClient();
 
         var response = await httpClient.GetAsync("/api/v1/developer/access_policies", cancellationToken);
 
@@ -41,7 +41,7 @@ public class AccessPolicyClient : ClientBase, IAccessPolicyClient
     /// <inheritdoc/>
     public async Task<AccessPolicyDetails> FetchAccessPolicyAsync(string policyId, CancellationToken cancellationToken = default)
     {
-        using var httpClient = GetClient();
+        var httpClient = GetClient();
 
         var response = await httpClient.GetAsync($"/api/v1/developer/access_policies/{policyId}", cancellationToken);
 
@@ -54,7 +54,7 @@ public class AccessPolicyClient : ClientBase, IAccessPolicyClient
     /// <inheritdoc/>
     public async Task CreateAccessPolicyAsync(string name, List<string> resourceIds, string scheduleId, CancellationToken cancellationToken = default)
     {
-        using var httpClient = GetClient();
+        var httpClient = GetClient();
 
         var payload = new
         {
@@ -72,7 +72,7 @@ public class AccessPolicyClient : ClientBase, IAccessPolicyClient
     /// <inheritdoc/>
     public async Task DeleteAccessPolicyAsync(string policyId, CancellationToken cancellationToken = default)
     {
-        using var httpClient = GetClient();
+        var httpClient = GetClient();
 
         var response = await httpClient.DeleteAsync($"/api/v1/developer/access_policies/{policyId}", cancellationToken);
 

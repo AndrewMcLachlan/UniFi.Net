@@ -1,4 +1,5 @@
-﻿using System.Net.Http.Json;
+﻿using Microsoft.Extensions.DependencyInjection;
+using System.Net.Http.Json;
 using System.Text.Json;
 using UniFi.Net.Network.Models;
 
@@ -7,9 +8,7 @@ namespace UniFi.Net.Network;
 /// <inheritdoc />
 public class NetworkClient : INetworkClient
 {
-    private readonly IHttpClientFactory? _httpClientFactory;
-    private readonly Uri? _host;
-    private readonly string? _apiKey;
+    private readonly IHttpClientFactory _httpClientFactory;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="NetworkClient"/> class using an <see cref="IHttpClientFactory"/>.
@@ -33,8 +32,15 @@ public class NetworkClient : INetworkClient
         ArgumentNullException.ThrowIfNull(host);
         ArgumentException.ThrowIfNullOrWhiteSpace(apiKey);
 
-        _host = host;
-        _apiKey = apiKey;
+        // Manually create an IHttpClientFactory for on-demand HttpClient creation
+        var services = new ServiceCollection();
+        services.AddHttpClient<NetworkClient>("NetworkClient", (provider, client) =>
+        {
+            HttpClientConfigurator.ConfigureHttpClient(client, host, apiKey);
+        });
+        var serviceProvider = services.BuildServiceProvider();
+        _httpClientFactory = serviceProvider.GetRequiredService<IHttpClientFactory>();
+
     }
 
     /// <inheritdoc />
@@ -70,6 +76,30 @@ public class NetworkClient : INetworkClient
     }
 
     /// <inheritdoc />
+    public Task ExecutePortAction(int portIdx, Guid siteId, Guid deviceId, PortAction action, CancellationToken cancellationToken = default)
+    {
+        string path = $"v1/sites/{siteId}/devices/{deviceId}/ports/{portIdx}/actions";
+        var request = new HttpRequestMessage(HttpMethod.Post, path)
+        {
+            Content = JsonContent.Create(new { action })
+        };
+
+        return SendAsync(request, cancellationToken);
+    }
+
+    /// <inheritdoc />
+    public Task ExecuteDeviceAction(Guid siteId, Guid deviceId, DeviceAction action, CancellationToken cancellationToken = default)
+    {
+        string path = $"v1/sites/{siteId}/devices/{deviceId}/actions";
+        var request = new HttpRequestMessage(HttpMethod.Post, path)
+        {
+            Content = JsonContent.Create(new { action })
+        };
+
+        return SendAsync(request, cancellationToken);
+    }
+
+    /// <inheritdoc />
     public Task<PagedResponse<Client>> ListClients(Guid siteId, string? filter = null, int? offset = null, int? limit = null, CancellationToken cancellationToken = default)
     {
         string path = $"proxy/network/integration/v1/sites/{siteId}/clients";
@@ -87,9 +117,29 @@ public class NetworkClient : INetworkClient
         return GetFromJsonAsync<Client>(path, cancellationToken);
     }
 
+    /// <inheritdoc />
+    public Task<ExecuteClientActionResponse> ExecuteClientAction(Guid siteId, Guid clientId, ClientAction action, long? timeLimitMinutes = null, long? dataUsageLimitMBytes = null, long? rxRateLimitKbps = null, long? txRateLimitKbps = null, CancellationToken cancellationToken = default)
+    {
+        string path = $"proxy/network/integration/v1/sites/{siteId}/clients/{clientId}/actions";
+        var requestBody = new
+        {
+            action,
+            timeLimitMinutes,
+            dataUsageLimitMBytes,
+            rxRateLimitKbps,
+            txRateLimitKbps
+        };
+        var request = new HttpRequestMessage(HttpMethod.Post, path)
+        {
+            Content = JsonContent.Create(requestBody)
+        };
+
+        return SendAsync<ExecuteClientActionResponse>(request, cancellationToken);
+    }
+
     private async Task<T> GetFromJsonAsync<T>(string requestUri, CancellationToken cancellationToken = default)
     {
-        using var client = GetClient();
+        var client = GetClient();
 
         try
         {
@@ -116,16 +166,51 @@ public class NetworkClient : INetworkClient
         }
     }
 
+    private async Task<T> SendAsync<T>(HttpRequestMessage request, CancellationToken cancellationToken = default)
+    {
+        var client = GetClient();
+        try
+        {
+            var responseMessage = await client.SendAsync(request, cancellationToken);
+            responseMessage.EnsureSuccessStatusCode();
+            var result = await responseMessage.Content.ReadFromJsonAsync<T>(cancellationToken: cancellationToken);
+            return result ?? throw new InvalidOperationException($"Failed to deserialize response from {request.RequestUri}.");
+        }
+        catch (HttpRequestException ex)
+        {
+            throw new InvalidOperationException($"Error fetching data from {request.RequestUri}: {ex.Message}", ex);
+        }
+        catch (NotSupportedException ex)
+        {
+            throw new InvalidOperationException($"The content type is not supported for {request.RequestUri}: {ex.Message}", ex);
+        }
+        catch (JsonException ex)
+        {
+            throw new InvalidOperationException($"Error deserializing response from {request.RequestUri}: {ex.Message}", ex);
+        }
+    }
+
+    private async Task SendAsync(HttpRequestMessage request, CancellationToken cancellationToken = default)
+    {
+        var client = GetClient();
+        try
+        {
+            var responseMessage = await client.SendAsync(request, cancellationToken);
+            responseMessage.EnsureSuccessStatusCode();
+        }
+        catch (HttpRequestException ex)
+        {
+            throw new InvalidOperationException($"Error fetching data from {request.RequestUri}: {ex.Message}", ex);
+        }
+        catch (NotSupportedException ex)
+        {
+            throw new InvalidOperationException($"The content type is not supported for {request.RequestUri}: {ex.Message}", ex);
+        }
+    }
+
     private HttpClient GetClient()
     {
         HttpClient client;
-
-        if (_httpClientFactory == null)
-        {
-            client = new HttpClient();
-            HttpClientConfigurator.ConfigureHttpClient(client, _host!, _apiKey!);
-            return client;
-        }
 
         client = _httpClientFactory.CreateClient("NetworkClient");
         if (client.BaseAddress == null)

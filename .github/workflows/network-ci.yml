@@ -1,0 +1,25 @@
+name: Network CI
+
+on:
+  push:
+    branches:
+      - "main"
+  pull_request:
+    branches:
+      - "main"
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: andrewmclachlan/actions/get-version-number-from-tag@feature/get-version-from-tag
+        id: get-version-number
+      - name: Package
+        run: dotnet pack src/UniFi.Net.Network -o ${{ github.workspace }}/publish --configuration Release --p:Version=${{ steps.get-version-number.outputs.version }}-ci.${{ github.run_number }} --p:FileVersion=${{ steps.set-version-number.outputs.version }}
+      - name: Publish Packages
+        if: (github.event_name != 'pull_request' && github.event_name != 'pull_request_target' && github.ref == 'refs/heads/main')
+        run: dotnet nuget push ${{ github.workspace }}/publish/**/*.nupkg

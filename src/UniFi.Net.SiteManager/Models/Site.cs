@@ -6,11 +6,11 @@ namespace UniFi.Net.SiteManager.Models;
 ///
 /// </summary>
 /// <param name="SiteId">Unique identifier of the site.</param>
-/// <param name="HostId">Unique identifier of the host device managing this site..</param>
-/// <param name="Meta">Site metadata including name, description, timezone, and gateway MAC address. Structure may vary depending on the UniFi Network version.</param>
+/// <param name="HostId">Unique identifier of the host device managing this site.</param>
+/// <param name="Meta">Site metadata including name, description, time zone, and gateway MAC address. Structure may vary depending on the UniFi Network version.</param>
 /// <param name="Statistics">Site statistics including device counts, client counts, and network performance metrics. Structure may vary depending on the UniFi Network version.</param>
 /// <param name="Permission">Permission level of the current user for this site (admin, readonly, etc.).</param>
-/// <param name="IsOwner">Indicates if the current user is the owner of this site</param>
+/// <param name="IsOwner">Indicates if the current user is the owner of this site.</param>
 public record Site(
     string SiteId,
     string HostId,
@@ -43,24 +43,6 @@ public record SiteStatistics(
     IReadOnlyDictionary<string, int> Percentages
 );
 
-public record SiteCounts(
-    int CriticalNotification,
-    int GatewayDevice,
-    int GuestClient,
-    int LanConfiguration,
-    int OfflineDevice,
-    int OfflineGatewayDevice,
-    int OfflineWifiDevice,
-    int OfflineWiredDevice,
-    int PendingUpdateDevice,
-    int TotalDevice,
-    int WanConfiguration,
-    int WifiClient,
-    int WifiConfiguration,
-    int WifiDevice,
-    int WiredClient,
-    int WiredDevice
-);
 
 public record SiteGateway(
     string HardwareId,

@@ -27,7 +27,7 @@ public class DeviceClient : ClientBase, IDeviceClient
     ///<inheritdoc />
     public async Task<List<DeviceSummary>> FetchAllDevicesAsync(CancellationToken cancellationToken = default)
     {
-        using var httpClient = GetClient();
+        var httpClient = GetClient();
 
         var response = await httpClient.GetAsync("/api/v1/developer/devices", cancellationToken);
 

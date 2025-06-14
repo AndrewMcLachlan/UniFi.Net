@@ -8,6 +8,10 @@
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    <DebugType>embedded</DebugType>
+    <Deterministic>true</Deterministic>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -19,23 +23,25 @@
     <Version>1.0.0</Version>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <PackageReadmeFile>README.md</PackageReadmeFile>
-    <PackageTags>Ubiqiti;UniFi;Site;Manager;SiteManager</PackageTags>
+    <PackageTags>ubiqiti;unifi;site;manager;sitemanager</PackageTags>
     <PackageProjectUrl>https://github.com/AndrewMcLachlan/UniFi.Net</PackageProjectUrl>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(GITHUB_ACTIONS)' == 'true'">
+    <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
   </PropertyGroup>
 
   <ItemGroup>
     <Content Include="README.md" Pack="true" PackagePath="" />
-  </ItemGroup>
-
-  <ItemGroup>
     <Content Include="../../LICENSE" Link="LICENSE" Pack="true" PackagePath="" />
   </ItemGroup>
-
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.5" />
     <PackageReference Include="Microsoft.Extensions.Http" Version="9.0.5" />
     <PackageReference Include="Microsoft.Extensions.Options" Version="9.0.5" />
   </ItemGroup>
+
+  <Import Project="..\UniFi.Net.Core\UniFi.Net.Core.projitems" Label="Shared" />
 
 </Project>

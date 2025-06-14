@@ -1,10 +1,14 @@
 <Solution>
+  <Folder Name="/.github/">
+    <File Path=".github/workflows/network-ci.yml" />
+  </Folder>
   <Folder Name="/Solution Items/">
     <File Path=".editorconfig" />
     <File Path="LICENSE" />
     <File Path="README.md" />
   </Folder>
   <Project Path="src/UniFi.Net.Access/UniFi.Net.Access.csproj" />
+  <Project Path="src/UniFi.Net.Core/UniFi.Net.Core.shproj" Id="67fa9e0b-39ea-4040-b858-c276944492c3" />
   <Project Path="src/UniFi.Net.Network/UniFi.Net.Network.csproj" />
   <Project Path="src/UniFi.Net.SiteManager/UniFi.Net.SiteManager.csproj" />
   <Project Path="tests/UniFi.Net.TestHarness/UniFi.Net.TestHarness.csproj" />

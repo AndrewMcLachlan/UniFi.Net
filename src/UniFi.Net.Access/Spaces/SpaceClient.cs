@@ -28,7 +28,7 @@ public class SpaceClient : ClientBase, ISpaceClient
     /// <inheritdoc />
     public async Task<List<DoorGroupSummary>> FetchAllDoorGroupsAsync(CancellationToken cancellationToken = default)
     {
-        using var httpClient = GetClient();
+        var httpClient = GetClient();
 
         var response = await httpClient.GetAsync("/api/v1/developer/door_groups", cancellationToken);
 
@@ -41,7 +41,7 @@ public class SpaceClient : ClientBase, ISpaceClient
     /// <inheritdoc />
     public async Task<DoorGroupDetails> FetchDoorGroupAsync(string doorGroupId, CancellationToken cancellationToken = default)
     {
-        using var httpClient = GetClient();
+        var httpClient = GetClient();
 
         var response = await httpClient.GetAsync($"/api/v1/developer/door_groups/{doorGroupId}", cancellationToken);
 
@@ -54,7 +54,7 @@ public class SpaceClient : ClientBase, ISpaceClient
     /// <inheritdoc />
     public async Task CreateDoorGroupAsync(string name, List<string> resourceIds, CancellationToken cancellationToken = default)
     {
-        using var httpClient = GetClient();
+        var httpClient = GetClient();
 
         var payload = new
         {
@@ -71,7 +71,7 @@ public class SpaceClient : ClientBase, ISpaceClient
     /// <inheritdoc />
     public async Task DeleteDoorGroupAsync(string doorGroupId, CancellationToken cancellationToken = default)
     {
-        using var httpClient = GetClient();
+        var httpClient = GetClient();
 
         var response = await httpClient.DeleteAsync($"/api/v1/developer/door_groups/{doorGroupId}", cancellationToken);
 
@@ -81,7 +81,7 @@ public class SpaceClient : ClientBase, ISpaceClient
     /// <inheritdoc />
     public async Task<List<DoorSummary>> FetchAllDoorsAsync(CancellationToken cancellationToken = default)
     {
-        using var httpClient = GetClient();
+        var httpClient = GetClient();
 
         var response = await httpClient.GetAsync("/api/v1/developer/doors", cancellationToken);
 
@@ -94,7 +94,7 @@ public class SpaceClient : ClientBase, ISpaceClient
     /// <inheritdoc />
     public async Task<DoorDetails> FetchDoorAsync(string doorId, CancellationToken cancellationToken = default)
     {
-        using var httpClient = GetClient();
+        var httpClient = GetClient();
 
         var response = await httpClient.GetAsync($"/api/v1/developer/doors/{doorId}", cancellationToken);
 
@@ -107,7 +107,7 @@ public class SpaceClient : ClientBase, ISpaceClient
     /// <inheritdoc />
     public async Task UnlockDoorAsync(string doorId, CancellationToken cancellationToken = default)
     {
-        using var httpClient = GetClient();
+        var httpClient = GetClient();
 
         var response = await httpClient.PutAsync($"/api/v1/developer/doors/{doorId}/unlock", null, cancellationToken);
 
