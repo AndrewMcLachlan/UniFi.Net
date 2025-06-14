@@ -165,8 +165,7 @@ public class NetworkClient : INetworkClient
         using var client = GetClient();
         try
         {
-            var responseMessage = await client.SendAsync(request, cancellationToken) ??
-                   throw new InvalidOperationException($"Failed to deserialize response from {request.RequestUri}.");
+            var responseMessage = await client.SendAsync(request, cancellationToken);
             responseMessage.EnsureSuccessStatusCode();
             var result = await responseMessage.Content.ReadFromJsonAsync<T>(cancellationToken: cancellationToken);
             return result ?? throw new InvalidOperationException($"Failed to deserialize response from {request.RequestUri}.");
@@ -190,8 +189,7 @@ public class NetworkClient : INetworkClient
         using var client = GetClient();
         try
         {
-            var responseMessage = await client.SendAsync(request, cancellationToken) ??
-                   throw new InvalidOperationException($"Failed to deserialize response from {request.RequestUri}.");
+            var responseMessage = await client.SendAsync(request, cancellationToken);
             responseMessage.EnsureSuccessStatusCode();
         }
         catch (HttpRequestException ex)
