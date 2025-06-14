@@ -16,11 +16,6 @@ jobs:
       packages: write
     steps:
       - uses: actions/checkout@v4
-        env:
-          NUGET_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
-        with:
-          dotnet-version: 9.x
-          source-url: https://nuget.pkg.github.com/AndrewMcLachlan/index.json
       - uses: andrewmclachlan/actions/get-version-number-from-tag@feature/get-version-from-tag
         id: get-version-number
       - name: Package
