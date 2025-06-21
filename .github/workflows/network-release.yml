@@ -31,13 +31,13 @@ jobs:
       id: set-ver
       run: |
         if [ "${{ inputs.isprerelease }}" = "true" ]; then
-          echo "ver=${{ steps.get-version-number.outputs.major }}.${{ steps.get-version-number.outputs.minor }}-beta.${{ github.run_number }}" >> $GITHUB_ENV
+          echo "ver=${{ steps.get-version-number.outputs.major }}.${{ steps.get-version-number.outputs.minor }}.0-beta.${{ github.run_number }}" >> $GITHUB_ENV
         else
-          echo "ver=${{ steps.get-version-number.outputs.major }}.${{ steps.get-version-number.outputs.minor }}" >> $GITHUB_ENV
+          echo "ver=${{ steps.get-version-number.outputs.major }}.${{ steps.get-version-number.outputs.minor }}.0" >> $GITHUB_ENV
         fi
     - name: Package
       run: |
-        dotnet pack src/UniFi.Net.Network -o ${{ github.workspace }}/publish --configuration Release --p:Version=${{ steps.get-version-number.outputs.major }}.${{ steps.get-version-number.outputs.minor }} \
+        dotnet pack src/UniFi.Net.Network -o ${{ github.workspace }}/publish --configuration Release --p:Version=${{ steps.get-version-number.outputs.major }}.${{ steps.get-version-number.outputs.minor }}.0.0 \
         --p:FileVersion=${{ver}} \
         --p:PackageVersion=${{ver}}
     - name: Publish Packages

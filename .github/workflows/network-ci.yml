@@ -30,9 +30,9 @@ jobs:
         project: src/UniFi.Net.Network/UniFi.Net.Network.csproj
     - name: Package
       run: |
-        dotnet pack src/UniFi.Net.Network -o ${{ github.workspace }}/publish --configuration Release --p:Version=${{ steps.get-version-number.outputs.major }}.${{ steps.get-version-number.outputs.minor }} \
-        --p:FileVersion=${{ steps.get-version-number.outputs.major }}.${{ steps.get-version-number.outputs.minor }}-ci.${{ github.run_number }} \
-        --p:PackageVersion=${{ steps.get-version-number.outputs.major }}.${{ steps.get-version-number.outputs.minor }}-ci.${{ github.run_number }}
+        dotnet pack src/UniFi.Net.Network -o ${{ github.workspace }}/publish --configuration Release --p:Version=${{ steps.get-version-number.outputs.major }}.${{ steps.get-version-number.outputs.minor }}.0.0 \
+        --p:FileVersion=${{ steps.get-version-number.outputs.major }}.${{ steps.get-version-number.outputs.minor }}.0-ci.${{ github.run_number }} \
+        --p:PackageVersion=${{ steps.get-version-number.outputs.major }}.${{ steps.get-version-number.outputs.minor }}.0-ci.${{ github.run_number }}
     - name: Publish Packages
-      if: (github.event_name != 'pull_request' && github.event_name != 'pull_request_target' && github.ref == 'refs/heads/main')
+      if: ((github.event_name == 'workflow_dispatch' || github.event_name == 'push') && github.ref == 'refs/heads/main')
       run: dotnet nuget push ${{ github.workspace }}/publish/**/*.nupkg
