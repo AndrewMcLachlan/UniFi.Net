@@ -31,7 +31,7 @@ jobs:
     - name: Package
       run: |
         dotnet pack src/UniFi.Net.Network -o ${{ github.workspace }}/publish --configuration Release --p:Version=${{ steps.get-version-number.outputs.major }}.${{ steps.get-version-number.outputs.minor }}.0.0 \
-        --p:FileVersion=${{ steps.get-version-number.outputs.major }}.${{ steps.get-version-number.outputs.minor }}.0-ci.${{ github.run_number }} \
+        --p:FileVersion=${{ steps.get-version-number.outputs.major }}.${{ steps.get-version-number.outputs.minor }}.0.0 \
         --p:PackageVersion=${{ steps.get-version-number.outputs.major }}.${{ steps.get-version-number.outputs.minor }}.0-ci.${{ github.run_number }}
     - name: Publish Packages
       if: ((github.event_name == 'workflow_dispatch' || github.event_name == 'push') && github.ref == 'refs/heads/main')
