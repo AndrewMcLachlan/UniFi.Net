@@ -23,8 +23,11 @@ jobs:
       with:
         dotnet-version: 9.x
         source-url: https://nuget.pkg.github.com/AndrewMcLachlan/index.json
+    - name: Get version info
     - uses: andrewmclachlan/actions/get-version-number-from-project@feature/get-version-from-tag
       id: get-version-number
+      with:
+        project: src/UniFi.Net.Network/UniFi.Net.Network.csproj
     - name: Package
       run: |
         dotnet pack src/UniFi.Net.Network -o ${{ github.workspace }}/publish --configuration Release --p:Version=${{ steps.get-version-number.outputs.major }}.${{ steps.get-version-number.outputs.minor }} \

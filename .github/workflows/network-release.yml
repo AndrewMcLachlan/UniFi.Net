@@ -1,4 +1,4 @@
-name: Network CI
+name: Network Release
 
 on:
   workflow_dispatch:
@@ -23,8 +23,10 @@ jobs:
         dotnet-version: 9.x
         source-url: https://api.nuget.org/v3/index.json
     - name: Get version info
-      uses: andrewmclachlan/actions/get-version-number-from-project@feature/get-version-from-tag
+    - uses: andrewmclachlan/actions/get-version-number-from-project@feature/get-version-from-tag
       id: get-version-number
+      with:
+        project: src/UniFi.Net.Network/UniFi.Net.Network.csproj
     - name: Set version variable
       id: set-ver
       run: |
