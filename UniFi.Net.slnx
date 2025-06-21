@@ -1,6 +1,7 @@
 <Solution>
   <Folder Name="/.github/">
     <File Path=".github/workflows/network-ci.yml" />
+    <File Path=".github/workflows/network-release.yml" />
   </Folder>
   <Folder Name="/Solution Items/">
     <File Path=".editorconfig" />

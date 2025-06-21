@@ -1,0 +1,42 @@
+name: Network CI
+
+on:
+  workflow_dispatch:
+    inputs:
+      isprerelease:
+        description: "Pre-release"
+        default: false
+        type: boolean
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+    steps:
+    - uses: actions/checkout@v4
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      env:
+        NUGET_AUTH_TOKEN: ${{secrets.NUGET_API_KEY}}
+      with:
+        dotnet-version: 9.x
+        source-url: https://api.nuget.org/v3/index.json
+    - name: Get version info
+      uses: andrewmclachlan/actions/get-version-number-from-project@feature/get-version-from-tag
+      id: get-version-number
+    - name: Set version variable
+      id: set-ver
+      run: |
+        if [ "${{ inputs.isprerelease }}" = "true" ]; then
+          echo "ver=${{ steps.get-version-number.outputs.major }}.${{ steps.get-version-number.outputs.minor }}-beta.${{ github.run_number }}" >> $GITHUB_ENV
+        else
+          echo "ver=${{ steps.get-version-number.outputs.major }}.${{ steps.get-version-number.outputs.minor }}" >> $GITHUB_ENV
+        fi
+    - name: Package
+      run: |
+        dotnet pack src/UniFi.Net.Network -o ${{ github.workspace }}/publish --configuration Release --p:Version=${{ steps.get-version-number.outputs.major }}.${{ steps.get-version-number.outputs.minor }} \
+        --p:FileVersion=${{ver}} \
+        --p:PackageVersion=${{ver}}
+    - name: Publish Packages
+      run: dotnet nuget push ${{ github.workspace }}/publish/**/*.nupkg
