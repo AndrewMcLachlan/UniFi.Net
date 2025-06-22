@@ -22,6 +22,6 @@ internal class SnakeCaseNamingPolicy : JsonNamingPolicy
                 sb.Append(c);
             }
         }
-        return sb.ToString();
+        return sb.ToString().ToUpperInvariant();
     }
 }

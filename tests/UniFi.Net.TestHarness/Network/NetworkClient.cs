@@ -1,18 +1,26 @@
 ﻿using UniFi.Net.Network;
-using static System.Console;
+using UniFi.Net.Network.Models;
 
 namespace UniFi.Net.TestHarness.Network;
 
 public partial class NetworkClient(INetworkClient uniFiClient)
 {
+    private const byte NetworkExitOption = 9;
+
     public async Task StartAsync(CancellationToken cancellationToken)
     {
         var sites = await uniFiClient.ListSites(cancellationToken: cancellationToken);
 
         SelectedSite = sites.Data.Count > 0 ? sites.Data[0] : null;
 
-        (int Primary, int? Secondary) action = (0, null);
-        while (action.Primary != 5 && !cancellationToken.IsCancellationRequested)
+        if (SelectedSite != null)
+        {
+            var devices = await uniFiClient.ListDevices(SelectedSite.Id, null, null, 200, cancellationToken);
+            SelectedDevice = devices.Data.Count > 0 ? devices.Data[0] : null;
+        }
+
+        (int Primary, object? Action) action = (0, null);
+        while (action.Primary != NetworkExitOption && !cancellationToken.IsCancellationRequested)
         {
             action = PrintMenu();
 
@@ -20,7 +28,7 @@ public partial class NetworkClient(INetworkClient uniFiClient)
         }
     }
 
-    private async Task DoAction((int Primary, int? Secondary) action, CancellationToken cancellationToken)
+    private async Task DoAction((int Primary, object? Action) action, CancellationToken cancellationToken)
     {
         switch (action.Primary)
         {
@@ -28,15 +36,27 @@ public partial class NetworkClient(INetworkClient uniFiClient)
                 await DoInfo(cancellationToken);
                 break;
             case 2:
-                await DoSites(action.Secondary!.Value, cancellationToken);
+                await DoSites((int)action.Action!, cancellationToken);
                 break;
             case 3:
-                await DoDevices(action.Secondary!.Value, cancellationToken);
+                await DoDevices((int)action.Action!, cancellationToken);
                 break;
             case 4:
-                await DoClients(action.Secondary!.Value, cancellationToken);
+                await DoClients((int)action.Action!, cancellationToken);
                 break;
             case 5:
+                await DoPortActions(((PortAction?, int?))action.Action!, cancellationToken);
+                break;
+            case 6:
+                await DoDeviceActions((DeviceAction?)action.Action, cancellationToken);
+                break;
+            case 7:
+                await DoClientActions((ClientAction?)action.Action, cancellationToken);
+                break;
+            case 8:
+                await DoVouchers((int)action.Action!, cancellationToken);
+                break;
+            case NetworkExitOption:
                 break;
             default:
                 WriteLine("Invalid option, please try again.");
@@ -52,31 +72,35 @@ public partial class NetworkClient(INetworkClient uniFiClient)
         ReadKey();
     }
 
-    private (int, int?) PrintMenu()
+    private (int, object?) PrintMenu()
     {
         Clear();
         WriteLine("Unifi Network Client Test Harness");
         WriteLine("-------------------------");
         if (SelectedSite is not null)
         {
-            WriteLine($"Current site is ${SelectedSite.Name}");
+            WriteLine($"Current site is {SelectedSite.Name}");
             WriteLine("-------------------------");
         }
         if (SelectedDevice is not null)
         {
-            WriteLine($"Current device is ${SelectedDevice.Name}");
+            WriteLine($"Current device is {SelectedDevice.Name}");
             WriteLine("-------------------------");
         }
         if (SelectedClient is not null)
         {
-            WriteLine($"Current client is ${SelectedClient.Name}");
+            WriteLine($"Current client is {SelectedClient.Name}");
             WriteLine("-------------------------");
         }
         WriteLine("1. Info");
         WriteLine("2. Sites");
         WriteLine("3. Devices");
         WriteLine("4. Clients");
-        WriteLine("5. Main menu");
+        WriteLine("5. Port Actions");
+        WriteLine("6. Device Actions");
+        WriteLine("7. Client Actions");
+        WriteLine("8. Vouchers");
+        WriteLine($"{NetworkExitOption}. Main menu");
         Write("Select an option: ");
 
         var input = ReadKey();
@@ -88,7 +112,11 @@ public partial class NetworkClient(INetworkClient uniFiClient)
             '2' => (2, PrintSitesMenu()), // List Devices
             '3' => (3, PrintDevicesMenu()), // Get Device Details
             '4' => (4, PrintClientsMenu()), // List Clients
-            '5' => (5, null), // Exit
+            '5' => (5, PrintPortActionsMenu()), // Port Actions
+            '6' => (6, PrintDeviceActionsMenu()), // Device Actions
+            '7' => (7, PrintClientActionsMenu()),
+            '8' => (8, PrintVouchersMenu()),
+            (char)NetworkExitOption => (NetworkExitOption, null), // Exit
             _ => (-1, null)
         };
     }

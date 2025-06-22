@@ -21,7 +21,6 @@ public partial class NetworkClient
 
         if (!Int32.TryParse(input.KeyChar.ToString(), out var option) || option > 3)
         {
-            WriteLine("Invalid option, please try again.");
             return PrintClientsMenu();
         }
 

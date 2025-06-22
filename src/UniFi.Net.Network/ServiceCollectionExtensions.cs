@@ -21,7 +21,7 @@ public static class ServiceCollectionExtensions
 
         services.Configure(configure);
 
-        services.AddHttpClient<NetworkClient>("NetworkClient", (provider, client) =>
+        services.AddHttpClient<NetworkClient>(NetworkClient.ClientName, (provider, client) =>
         {
             var config = provider.GetRequiredService<IOptions<UniFiConfig>>().Value;
             HttpClientConfigurator.ConfigureHttpClient(client, new Uri(config.Host), config.ApiKey);

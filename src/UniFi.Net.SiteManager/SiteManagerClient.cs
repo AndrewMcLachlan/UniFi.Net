@@ -1,7 +1,9 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Primitives;
+﻿using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Primitives;
+using UniFi.Net.SiteManager.Exceptions;
 using UniFi.Net.SiteManager.Models;
 
 namespace UniFi.Net.SiteManager;
@@ -96,7 +98,7 @@ public class SiteManagerClient : ISiteManagerClient
 
         Dictionary<string, StringValues> queryParams = new()
         {
-            ["hostIds[]"] = hostIds != null ? new StringValues([..hostIds]) : String.Empty,
+            ["hostIds[]"] = hostIds != null ? new StringValues([.. hostIds]) : String.Empty,
             ["time"] = time?.ToString("o") ?? String.Empty,
             ["pageSize"] = pageSize?.ToString() ?? String.Empty,
             ["nextToken"] = nextToken ?? String.Empty,
@@ -173,7 +175,10 @@ public class SiteManagerClient : ISiteManagerClient
             var responseMessage = await client.GetAsync(requestUri, cancellationToken) ??
                 throw new InvalidOperationException($"Failed to deserialize response from {requestUri}.");
 
-            responseMessage.EnsureSuccessStatusCode();
+            if (!responseMessage.IsSuccessStatusCode)
+            {
+                await ProcessErrorResponse(requestUri, responseMessage, cancellationToken);
+            }
 
             var content = await responseMessage.Content.ReadAsStringAsync(cancellationToken);
 
@@ -204,7 +209,10 @@ public class SiteManagerClient : ISiteManagerClient
             var responseMessage = await client.PostAsJsonAsync<TRequest>(requestUri, body, cancellationToken) ??
                    throw new InvalidOperationException($"Failed to deserialize response from {requestUri}.");
 
-            responseMessage.EnsureSuccessStatusCode();
+            if (!responseMessage.IsSuccessStatusCode)
+            {
+                await ProcessErrorResponse(new HttpRequestMessage(HttpMethod.Post, requestUri), responseMessage, cancellationToken);
+            }
 
             var result = await responseMessage.Content.ReadFromJsonAsync<TResponse>(cancellationToken: cancellationToken);
 
@@ -221,6 +229,31 @@ public class SiteManagerClient : ISiteManagerClient
         catch (JsonException ex)
         {
             throw new InvalidOperationException($"Error deserializing response from {requestUri}: {ex.Message}", ex);
+        }
+    }
+
+    private static Task ProcessErrorResponse(HttpRequestMessage request, HttpResponseMessage response, CancellationToken cancellationToken) =>
+        ProcessErrorResponse(request.RequestUri, response, cancellationToken);
+
+    private static Task ProcessErrorResponse(Uri? requestUri, HttpResponseMessage response, CancellationToken cancellationToken) =>
+        ProcessErrorResponse(requestUri?.ToString(), response, cancellationToken);
+
+    private static async Task ProcessErrorResponse(string? requestUri, HttpResponseMessage response, CancellationToken cancellationToken)
+    {
+        try
+        {
+            var result = await response.Content.ReadFromJsonAsync<ErrorResponse>(cancellationToken: cancellationToken) ?? throw new InvalidOperationException($"Error from {requestUri ?? "unknown URI"}: {response.ReasonPhrase}");
+
+            throw result.HttpStatusCode switch
+            {
+                HttpStatusCode.NotFound => new NotFoundException(result),
+                HttpStatusCode.Unauthorized => new UnauthorizedException(result),
+                _ => new UniFiSiteManagerException(result)
+            };
+        }
+        catch (JsonException ex)
+        {
+            throw new InvalidOperationException($"Error from {requestUri}: {response.ReasonPhrase}", ex);
         }
     }
 
