@@ -38,7 +38,7 @@ jobs:
     - name: Package
       run: |
         dotnet pack src/UniFi.Net.Network -o ${{ github.workspace }}/publish --configuration Release --p:Version=${{ steps.get-version-number.outputs.major }}.${{ steps.get-version-number.outputs.minor }}.0.0 \
-        --p:FileVersion=${{ver}} \
-        --p:PackageVersion=${{ver}}
+        --p:FileVersion=${{env.ver}} \
+        --p:PackageVersion=${{env.ver}}
     - name: Publish Packages
       run: dotnet nuget push ${{ github.workspace }}/publish/**/*.nupkg
