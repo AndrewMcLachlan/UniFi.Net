@@ -31,7 +31,7 @@ jobs:
       id: set-ver
       run: |
         if [ "${{ inputs.isprerelease }}" = "true" ]; then
-          echo "ver=${{ steps.get-version-number.outputs.major }}.${{ steps.get-version-number.outputs.minor }}.0-beta.${{ github.run_number }}" >> $GITHUB_ENV
+          echo "ver=${{ steps.get-version-number.outputs.major }}.${{ steps.get-version-number.outputs.minor }}.0.${{ github.run_number }}" >> $GITHUB_ENV
         else
           echo "ver=${{ steps.get-version-number.outputs.major }}.${{ steps.get-version-number.outputs.minor }}.0" >> $GITHUB_ENV
         fi
@@ -41,4 +41,4 @@ jobs:
         --p:FileVersion=${{env.ver}} \
         --p:PackageVersion=${{env.ver}}
     - name: Publish Packages
-      run: dotnet nuget push ${{ github.workspace }}/publish/**/*.nupkg
+      run: dotnet nuget push ${{ github.workspace }}/publish/**/*.nupkg --api-key ${{secrets.NUGET_API_KEY}} --skip-duplicate
