@@ -1,8 +1,8 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Primitives;
-using System.Net;
+﻿using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Primitives;
 using UniFi.Net.SiteManager.Exceptions;
 using UniFi.Net.SiteManager.Models;
 
@@ -177,7 +177,7 @@ public class SiteManagerClient : ISiteManagerClient
 
             if (!responseMessage.IsSuccessStatusCode)
             {
-                await ProcessErrorResponse(new HttpRequestMessage(HttpMethod.Post, requestUri), responseMessage, cancellationToken);
+                await ProcessErrorResponse(requestUri, responseMessage, cancellationToken);
             }
 
             var content = await responseMessage.Content.ReadAsStringAsync(cancellationToken);
@@ -232,11 +232,17 @@ public class SiteManagerClient : ISiteManagerClient
         }
     }
 
-    private static async Task ProcessErrorResponse(HttpRequestMessage request, HttpResponseMessage response, CancellationToken cancellationToken)
+    private static Task ProcessErrorResponse(HttpRequestMessage request, HttpResponseMessage response, CancellationToken cancellationToken) =>
+        ProcessErrorResponse(request.RequestUri, response, cancellationToken);
+
+    private static Task ProcessErrorResponse(Uri? requestUri, HttpResponseMessage response, CancellationToken cancellationToken) =>
+        ProcessErrorResponse(requestUri?.ToString(), response, cancellationToken);
+
+    private static async Task ProcessErrorResponse(string? requestUri, HttpResponseMessage response, CancellationToken cancellationToken)
     {
         try
         {
-            var result = await response.Content.ReadFromJsonAsync<ErrorResponse>(cancellationToken: cancellationToken) ?? throw new InvalidOperationException($"Error from {request.RequestUri}: {response.ReasonPhrase}");
+            var result = await response.Content.ReadFromJsonAsync<ErrorResponse>(cancellationToken: cancellationToken) ?? throw new InvalidOperationException($"Error from {requestUri ?? "unknown URI"}: {response.ReasonPhrase}");
 
             throw result.HttpStatusCode switch
             {
@@ -247,7 +253,7 @@ public class SiteManagerClient : ISiteManagerClient
         }
         catch (JsonException ex)
         {
-            throw new InvalidOperationException($"Error from {request.RequestUri}: {response.ReasonPhrase}", ex);
+            throw new InvalidOperationException($"Error from {requestUri}: {response.ReasonPhrase}", ex);
         }
     }
 
