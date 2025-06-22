@@ -8,11 +8,14 @@ on:
         default: true
         type: boolean
 
+permissions:
+  contents: read
+  id-token: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
-    permissions:
-      packages: write
+    if: ${{ github.ref == 'refs/heads/main' }}
     steps:
     - uses: actions/checkout@v4
     - name: Setup .NET
