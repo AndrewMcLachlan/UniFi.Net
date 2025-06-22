@@ -1,4 +1,5 @@
-﻿using UniFi.Net.Network.Models;
+﻿using UniFi.Net.Network.Filters;
+using UniFi.Net.Network.Models;
 using static System.Console;
 
 namespace UniFi.Net.TestHarness.Network;
@@ -15,6 +16,10 @@ public partial class NetworkClient
                 var sites = await uniFiClient.ListSites(cancellationToken: cancellationToken);
                 PrintSiteSelectionMenu(sites.Data);
                 break;
+            case 2:
+                var filteredSites = await uniFiClient.ListSites(new AndFilter(new EqualityFilter<string>("name", "Default"), new EqualityFilter<string>("name", "Default", true)), cancellationToken: cancellationToken);
+                PrintSiteSelectionMenu(filteredSites.Data);
+                break;
             default:
                 WriteLine("Invalid site action, please try again.");
                 break;
@@ -27,13 +32,13 @@ public partial class NetworkClient
         WriteLine("Sites Menu");
         WriteLine("----------");
         WriteLine("1. List Sites");
-        WriteLine("2. Back to Main Menu");
+        WriteLine("2. List Sites with filter");
+        WriteLine("3. Back to Main Menu");
         Write("Select an option: ");
         var input = ReadKey();
 
-        if (!Int32.TryParse(input.KeyChar.ToString(), out var option) || option > 2)
+        if (!Int32.TryParse(input.KeyChar.ToString(), out var option) || option > 3)
         {
-            WriteLine("Invalid option, please try again.");
             return PrintSitesMenu();
         }
 

@@ -9,9 +9,12 @@
     <File Path="LICENSE" />
     <File Path="README.md" />
   </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/UniFi.Net.Network.Tests/UniFi.Net.Network.Tests.csproj" Id="f7a46982-6089-48fb-981d-d3d82b962771" />
+    <Project Path="tests/UniFi.Net.TestHarness/UniFi.Net.TestHarness.csproj" />
+  </Folder>
   <Project Path="src/UniFi.Net.Access/UniFi.Net.Access.csproj" />
   <Project Path="src/UniFi.Net.Core/UniFi.Net.Core.shproj" Id="67fa9e0b-39ea-4040-b858-c276944492c3" />
   <Project Path="src/UniFi.Net.Network/UniFi.Net.Network.csproj" />
   <Project Path="src/UniFi.Net.SiteManager/UniFi.Net.SiteManager.csproj" />
-  <Project Path="tests/UniFi.Net.TestHarness/UniFi.Net.TestHarness.csproj" />
 </Solution>

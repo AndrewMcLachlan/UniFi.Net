@@ -8,7 +8,7 @@ public record ErrorResponse : Response
     /// <summary>
     /// Gets the HTTP error code.
     /// </summary>
-    public required int Code { get; init; }
+    public required string Code { get; init; }
 
     /// <summary>
     /// Gets the error message.

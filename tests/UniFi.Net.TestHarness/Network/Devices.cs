@@ -13,6 +13,7 @@ public partial class NetworkClient
         WriteLine("Devices Menu:");
         WriteLine("1. List Devices");
         WriteLine("2. Get Device Details");
+        WriteLine("3. Back to Main Menu");
         Write("Select an option: ");
 
         var input = ReadKey();
@@ -21,7 +22,6 @@ public partial class NetworkClient
 
         if (!Int32.TryParse(input.KeyChar.ToString(), out var option) || option > 3)
         {
-            WriteLine("Invalid option, please try again.");
             return PrintDevicesMenu();
         }
 

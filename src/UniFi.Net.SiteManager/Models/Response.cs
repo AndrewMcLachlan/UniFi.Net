@@ -1,4 +1,6 @@
-﻿namespace UniFi.Net.SiteManager.Models;
+﻿using System.Net;
+
+namespace UniFi.Net.SiteManager.Models;
 
 /// <summary>
 /// A response model.
@@ -8,7 +10,7 @@ public abstract record Response
     /// <summary>
     /// Gets the HTTP status code associated with the response.
     /// </summary>
-    public int HttpStatusCode { get; init; }
+    public HttpStatusCode HttpStatusCode { get; init; }
 
     /// <summary>
     /// Gets the unique identifier for the request trace.
