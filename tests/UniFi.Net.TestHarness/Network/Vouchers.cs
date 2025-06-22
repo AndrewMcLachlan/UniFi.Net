@@ -116,7 +116,7 @@ public partial class NetworkClient
         WriteLine("-------------------------------");
         for (int i = 0; i < vouchers.Count; i++)
         {
-            var voucher = vouchers.ElementAt(i);
+            var voucher = vouchers[i];
             WriteLine($"{i + 1}. {voucher.Name} ({voucher.Id})");
         }
         WriteLine($"{vouchers.Count + 1}. Back to Sites Menu");
