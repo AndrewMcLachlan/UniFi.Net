@@ -105,7 +105,7 @@ public record DevicePoe(
 /// <param name="Channel">The channel number.</param>
 public record DeviceRadio(
     string WlanStandard,
-    string FrequencyGHz,
+    float FrequencyGHz,
     int ChannelWidthMHz,
     int Channel
 );
