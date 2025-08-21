@@ -22,7 +22,7 @@ jobs:
         NUGET_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
       with:
         dotnet-version: 9.x
-        source-url: https://nuget.pkg.github.com/AndrewMcLachlan/index.json
+        source-url: https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json
     - name: Get version info
       uses: andrewmclachlan/actions/get-version-number-from-project@v4
       id: get-version-number
