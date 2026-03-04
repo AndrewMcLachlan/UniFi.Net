@@ -1,5 +1,3 @@
-﻿using System.Net;
-
 namespace UniFi.Net.Network.Models;
 
 /// <summary>
@@ -13,15 +11,15 @@ namespace UniFi.Net.Network.Models;
 /// <param name="Name">The name of the client.</param>
 /// <param name="ConnectedAt">The date and time the client connected.</param>
 /// <param name="IpAddress">The IP address of the client.</param>
-/// <param name="Access"></param>
+/// <param name="Access">The access information for the client.</param>
 /// <param name="Type">The type of client.</param>
 /// <param name="MacAddress">The MAC address of the client.</param>
 /// <param name="UplinkDeviceId">The ID device that this client is attached to.</param>
 public record Client(
     Guid Id,
     string Name,
-    DateTimeOffset ConnectedAt,
-    string IpAddress,
+    DateTimeOffset? ConnectedAt,
+    string? IpAddress,
     ClientAccess Access,
     string Type,
     string MacAddress,

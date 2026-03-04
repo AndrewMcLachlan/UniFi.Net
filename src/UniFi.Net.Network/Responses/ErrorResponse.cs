@@ -30,10 +30,10 @@ internal record ErrorResponse
     /// <summary>
     /// Gets the request path that caused the error.
     /// </summary>
-    public required string RequestPath { get; init; }
+    public string? RequestPath { get; init; }
 
     /// <summary>
     /// Gets the trace ID for the request.
     /// </summary>
-    public required Guid RequestId { get; init; }
+    public Guid? RequestId { get; init; }
 }

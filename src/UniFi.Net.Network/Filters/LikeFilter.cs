@@ -15,8 +15,8 @@ public class LikeFilter(string field, string value, bool not = false) : SingleVa
     ///<inheritdoc/>
     protected override string Operator => "like";
 
-    private string NotStart => Not ? "not(" : string.Empty;
-    private string NotEnd => Not ? ")" : string.Empty;
+    private string NotStart => Not ? "not(" : String.Empty;
+    private string NotEnd => Not ? ")" : String.Empty;
 
     /// <summary>
     /// Returns a string representation of the filter in the format "Field.Operator(Value)".

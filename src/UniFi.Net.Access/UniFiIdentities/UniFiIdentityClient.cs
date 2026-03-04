@@ -47,7 +47,7 @@ public class UniFiIdentityClient : ClientBase, IUniFiIdentityClient
     {
         var httpClient = GetClient();
 
-        var query = string.IsNullOrEmpty(resourceType) ? string.Empty : $"?resource_type={resourceType}";
+        var query = String.IsNullOrEmpty(resourceType) ? String.Empty : $"?resource_type={resourceType}";
         var response = await httpClient.GetAsync($"/api/v1/developer/users/identity/assignments{query}", cancellationToken);
 
         response.EnsureSuccessStatusCode();

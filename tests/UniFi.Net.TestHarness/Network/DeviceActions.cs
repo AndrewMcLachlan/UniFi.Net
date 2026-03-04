@@ -22,7 +22,7 @@ public partial class NetworkClient
 
         var input = ReadKey();
 
-        int primaryAction = int.TryParse(input.KeyChar.ToString(), out int primary) ? primary : 0;
+        int primaryAction = Int32.TryParse(input.KeyChar.ToString(), out int primary) ? primary : 0;
 
         if (primaryAction < 1 && primaryAction > exitOption)
         {

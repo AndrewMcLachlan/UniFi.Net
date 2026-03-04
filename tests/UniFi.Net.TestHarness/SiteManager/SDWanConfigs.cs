@@ -14,7 +14,7 @@ internal partial class SiteManagerClient
         Console.WriteLine("2. Get SD-WAN Config Status");
         Console.WriteLine("3. Exit");
         Console.Write("Select an option: ");
-        if (int.TryParse(Console.ReadLine(), out int choice) && choice >= 1 && choice <= 3)
+        if (Int32.TryParse(Console.ReadLine(), out int choice) && choice >= 1 && choice <= 3)
         {
             return choice;
         }

@@ -28,7 +28,7 @@ internal partial class SiteManagerClient
         WriteLine("2. Get Host by ID");
         WriteLine("3. Exit");
         Write("Select an option: ");
-        if (int.TryParse(ReadKey().KeyChar.ToString(), out int choice))
+        if (Int32.TryParse(ReadKey().KeyChar.ToString(), out int choice))
         {
             return choice;
         }

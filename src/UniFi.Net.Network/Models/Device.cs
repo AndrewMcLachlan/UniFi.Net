@@ -1,4 +1,4 @@
-﻿namespace UniFi.Net.Network.Models;
+namespace UniFi.Net.Network.Models;
 
 /// <summary>
 /// Represents a UniFi device with detailed information and configuration.
@@ -34,7 +34,7 @@ public record Device(
     DeviceUplink Uplink,
     DeviceFeatures Features,
     DeviceInterfaces Interfaces
-) : BaseDevice(Id, Name, Model, MacAddress, IpAddress, State);
+) : BaseDevice(Id, Name, Model, Supported, MacAddress, IpAddress, State);
 
 /// <summary>
 /// Represents the uplink information for a device.

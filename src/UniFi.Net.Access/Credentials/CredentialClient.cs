@@ -73,7 +73,7 @@ public class CredentialClient : ClientBase, ICredentialClient
         if (pageNum.HasValue) query.Add($"page_num={pageNum.Value}");
         if (pageSize.HasValue) query.Add($"page_size={pageSize.Value}");
 
-        var queryString = query.Count > 0 ? "?" + string.Join("&", query) : string.Empty;
+        var queryString = query.Count > 0 ? "?" + String.Join("&", query) : String.Empty;
         var response = await httpClient.GetAsync($"/api/v1/developer/credentials/nfc_cards{queryString}", cancellationToken);
 
         response.EnsureSuccessStatusCode();
