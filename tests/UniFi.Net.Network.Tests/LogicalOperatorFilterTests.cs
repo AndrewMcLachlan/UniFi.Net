@@ -1,14 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UniFi.Net.Network.Filters;
 
 namespace UniFi.Net.Network.Tests;
 
+[Trait("Category", "Unit")]
 public class LogicalOperatorFilterTests
 {
+    /// <summary>
+    /// Given two filters,
+    /// When combined using an <see cref="AndFilter"/>,
+    /// Then the output is an "and" expression containing both filters.
+    /// </summary>
     [Fact]
     public void AndFilter_ShouldCombineFilters()
     {
@@ -18,6 +19,11 @@ public class LogicalOperatorFilterTests
         Assert.Equal("and(type.eq('ap'), value.gt(2))", combinedFilter.ToString());
     }
 
+    /// <summary>
+    /// Given two filters,
+    /// When combined using an <see cref="OrFilter"/>,
+    /// Then the output is an "or" expression containing both filters.
+    /// </summary>
     [Fact]
     public void OrFilter_ShouldCombineFilters()
     {

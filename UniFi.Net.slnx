@@ -11,6 +11,7 @@
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/UniFi.Net.Network.Tests/UniFi.Net.Network.Tests.csproj" Id="f7a46982-6089-48fb-981d-d3d82b962771" />
+    <Project Path="tests/UniFi.Net.Network.IntegrationTests/UniFi.Net.Network.IntegrationTests.csproj" />
     <Project Path="tests/UniFi.Net.TestHarness/UniFi.Net.TestHarness.csproj" />
   </Folder>
   <Project Path="src/UniFi.Net.Access/UniFi.Net.Access.csproj" />

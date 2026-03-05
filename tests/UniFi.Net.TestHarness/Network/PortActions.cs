@@ -20,7 +20,7 @@ public partial class NetworkClient
 
         var input = ReadKey(true);
 
-        int primaryAction = int.TryParse(input.KeyChar.ToString(), out int primary) ? primary : 0;
+        int primaryAction = Int32.TryParse(input.KeyChar.ToString(), out int primary) ? primary : 0;
 
         int? secondaryAction = null;
 
@@ -39,7 +39,7 @@ public partial class NetworkClient
         {
             Write("\nEnter port ID (and press enter): ");
             var siteInput = ReadLine();
-            secondaryAction = int.TryParse(siteInput, out int secondary) ? secondary : 0;
+            secondaryAction = Int32.TryParse(siteInput, out int secondary) ? secondary : 0;
         }
 
         return ((PortAction)primaryAction - 1, secondaryAction);

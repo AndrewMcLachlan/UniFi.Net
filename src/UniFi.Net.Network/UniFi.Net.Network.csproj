@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net8.0;net9.0</TargetFrameworks>
+    <TargetFrameworks>net8.0;net9.0;net10.0</TargetFrameworks>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <IsPackable>true</IsPackable>
@@ -19,8 +19,8 @@
     <Company />
     <Copyright>© Andrew McLachlan 2025</Copyright>
     <Description>UniFi.Net is a .NET client library for interacting with Ubiquiti UniFi devices.</Description>
-    <AssemblyVersion>1.0.0.0</AssemblyVersion>
-    <Version>1.0.1</Version>
+    <AssemblyVersion>2.0.0.0</AssemblyVersion>
+    <Version>2.0.0</Version>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageTags>ubiqiti;unifi;network</PackageTags>
@@ -40,9 +40,12 @@
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.1" Condition="'$(TargetFramework)' == 'net8.0'" />
     <PackageReference Include="Microsoft.Extensions.Http" Version="8.0.1" Condition="'$(TargetFramework)' == 'net8.0'" />
     <PackageReference Include="Microsoft.Extensions.Options" Version="8.0.2" Condition="'$(TargetFramework)' == 'net8.0'" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.6" Condition="'$(TargetFramework)' == 'net9.0'" />
-    <PackageReference Include="Microsoft.Extensions.Http" Version="9.0.6" Condition="'$(TargetFramework)' == 'net9.0'" />
-    <PackageReference Include="Microsoft.Extensions.Options" Version="9.0.6" Condition="'$(TargetFramework)' == 'net9.0'" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.13" Condition="'$(TargetFramework)' == 'net9.0'" />
+    <PackageReference Include="Microsoft.Extensions.Http" Version="9.0.13" Condition="'$(TargetFramework)' == 'net9.0'" />
+    <PackageReference Include="Microsoft.Extensions.Options" Version="9.0.13" Condition="'$(TargetFramework)' == 'net9.0'" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.3" Condition="'$(TargetFramework)' == 'net10.0'" />
+    <PackageReference Include="Microsoft.Extensions.Http" Version="10.0.3" Condition="'$(TargetFramework)' == 'net10.0'" />
+    <PackageReference Include="Microsoft.Extensions.Options" Version="10.0.3" Condition="'$(TargetFramework)' == 'net10.0'" />
   </ItemGroup>
 
   <Import Project="..\UniFi.Net.Core\UniFi.Net.Core.projitems" Label="Shared" />

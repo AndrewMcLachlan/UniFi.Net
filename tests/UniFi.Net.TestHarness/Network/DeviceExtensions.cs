@@ -1,6 +1,5 @@
 using System.Text;
 using UniFi.Net.Network.Models;
-using static System.Console;
 
 namespace UniFi.Net.TestHarness.Network;
 public static class DeviceExtensions
@@ -79,7 +78,7 @@ public static class DeviceExtensions
         WriteLine();
     }
 
-    public static string ToPrettyString(this IList<string> list)
+    public static string ToPrettyString(this IReadOnlyList<string> list)
     {
         StringBuilder stringBuilder = new();
 

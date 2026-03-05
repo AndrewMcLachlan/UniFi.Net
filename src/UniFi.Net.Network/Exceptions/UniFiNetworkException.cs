@@ -26,12 +26,12 @@ public class UniFiNetworkException : Exception
     /// <summary>
     /// Gets the request path that caused the error.
     /// </summary>
-    public string RequestPath { get; }
+    public string? RequestPath { get; }
 
     /// <summary>
     /// Gets the trace ID for the request that caused the error.
     /// </summary>
-    public Guid RequestId { get; }
+    public Guid? RequestId { get; }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="UniFiNetworkException"/> class with a specified error message.

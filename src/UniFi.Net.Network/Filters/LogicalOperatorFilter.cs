@@ -39,5 +39,5 @@ public abstract class LogicalOperatorFilter : IFilter
     /// This method is useful for debugging or logging purposes to understand the state of the object.</remarks>
     /// <returns>A string that represents the current object, including the operator and its filters.</returns>
     public override string ToString() =>
-        $"{Operator}({string.Join(", ", Filters.Select(f => f.ToString()))})";
+        $"{Operator}({String.Join(", ", Filters.Select(f => f.ToString()))})";
 }

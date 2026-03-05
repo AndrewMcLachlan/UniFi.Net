@@ -1,4 +1,4 @@
-﻿namespace UniFi.Net.Network.Models;
+namespace UniFi.Net.Network.Models;
 
 /// <summary>
 /// Represents a guest voucher with usage and rate limits.
@@ -6,7 +6,7 @@
 /// <param name="Id">Unique identifier of the voucher.</param>
 /// <param name="CreatedAt">Date and time when the voucher was created (UTC).</param>
 /// <param name="Name">Name of the voucher.</param>
-/// <param name="Code">Numeric code for the voucher.</param>
+/// <param name="Code">The voucher code.</param>
 /// <param name="AuthorizedGuestLimit">Maximum number of guests authorized by this voucher.</param>
 /// <param name="AuthorizedGuestCount">Current number of guests authorized by this voucher.</param>
 /// <param name="ActivatedAt">Date and time when the voucher was activated (UTC).</param>
@@ -20,7 +20,7 @@ public record Voucher(
     Guid Id,
     DateTimeOffset CreatedAt,
     string Name,
-    long Code,
+    string Code,
     int? AuthorizedGuestLimit,
     int AuthorizedGuestCount,
     DateTimeOffset? ActivatedAt,

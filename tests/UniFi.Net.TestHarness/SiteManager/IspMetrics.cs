@@ -14,7 +14,7 @@ internal partial class SiteManagerClient
         Console.WriteLine("1. List ISP Metrics");
         Console.WriteLine("2. Get ISP Metric by ID");
         Console.WriteLine("3. Exit");
-        if (int.TryParse(Console.ReadLine(), out int choice) && choice >= 1 && choice <= 3)
+        if (Int32.TryParse(Console.ReadLine(), out int choice) && choice >= 1 && choice <= 3)
         {
             return choice;
         }

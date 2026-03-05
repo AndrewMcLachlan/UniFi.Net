@@ -1,18 +1,19 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection;
 using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
 using UniFi.Net.Network.Exceptions;
 using UniFi.Net.Network.Filters;
-using UniFi.Net.Network.Models;
 using UniFi.Net.Network.Responses;
 
 namespace UniFi.Net.Network;
 
 /// <inheritdoc />
-public class NetworkClient : INetworkClient
+public partial class NetworkClient : INetworkClient
 {
     internal static readonly string ClientName = typeof(NetworkClient).FullName!;
+
+    private const string PathPrefix = "proxy/network/integration/v1/";
 
     private readonly IHttpClientFactory _httpClientFactory;
 
@@ -41,7 +42,7 @@ public class NetworkClient : INetworkClient
 
         // Manually create an IHttpClientFactory for on-demand HttpClient creation
         var services = new ServiceCollection();
-        services.AddHttpClient<NetworkClient>("NetworkClient", (provider, client) =>
+        services.AddHttpClient(ClientName, client =>
         {
             HttpClientConfigurator.ConfigureHttpClient(client, host, apiKey);
         });
@@ -50,166 +51,52 @@ public class NetworkClient : INetworkClient
 
     }
 
-    /// <inheritdoc />
-    public Task<ApplicationInfo> GetApplicationInfo(CancellationToken cancellationToken = default) =>
-        GetFromJsonAsync<ApplicationInfo>("proxy/network/integration/v1/info", cancellationToken);
-
-    /// <inheritdoc />
-    public Task<PagedResponse<Site>> ListSites(IFilter? filter = null, int? offset = null, int? limit = null, CancellationToken cancellationToken = default)
+    private async Task<T> PostAsJsonAsync<T>(string uri, object body, CancellationToken ct)
     {
-        const string path = "proxy/network/integration/v1/sites";
-
-        string query = BuildPagingQuery(filter, offset, limit);
-
-        return GetFromJsonAsync<PagedResponse<Site>>(path + query, cancellationToken);
-    }
-
-    /// <inheritdoc />
-    public Task<PagedResponse<DeviceSummary>> ListDevices(Guid siteId, IFilter? filter = null, int? offset = null, int? limit = null, CancellationToken cancellationToken = default)
-    {
-        string path = $"proxy/network/integration/v1/sites/{siteId}/devices";
-
-        string query = BuildPagingQuery(filter, offset, limit);
-
-        return GetFromJsonAsync<PagedResponse<DeviceSummary>>(path + query, cancellationToken);
-    }
-
-    /// <inheritdoc />
-    public Task<Device> GetDevice(Guid siteId, Guid deviceId, CancellationToken cancellationToken = default)
-    {
-        string path = $"proxy/network/integration/v1/sites/{siteId}/devices/{deviceId}";
-
-        return GetFromJsonAsync<Device>(path, cancellationToken);
-    }
-
-    /// <inheritdoc />
-    public Task PowerCyclePort(int portIdx, Guid siteId, Guid deviceId, CancellationToken cancellationToken = default)
-    {
-        string path = $"proxy/network/integration/v1/sites/{siteId}/devices/{deviceId}/interfaces/ports/{portIdx}/actions";
-        var request = new HttpRequestMessage(HttpMethod.Post, path)
+        var request = new HttpRequestMessage(HttpMethod.Post, uri)
         {
-            Content = JsonContent.Create(new { action = PortAction.PowerCycle })
+            Content = JsonContent.Create(body)
         };
-
-        return SendAsync(request, cancellationToken);
+        return await SendAsync<T>(request, ct);
     }
 
-    /// <inheritdoc />
-    public Task RestartDevice(Guid siteId, Guid deviceId, CancellationToken cancellationToken = default)
+    private async Task PostAsJsonAsync(string uri, object body, CancellationToken ct)
     {
-        string path = $"proxy/network/integration/v1/sites/{siteId}/devices/{deviceId}/actions";
-        var request = new HttpRequestMessage(HttpMethod.Post, path)
+        var request = new HttpRequestMessage(HttpMethod.Post, uri)
         {
-            Content = JsonContent.Create(new { action = DeviceAction.Restart })
+            Content = JsonContent.Create(body)
         };
-
-        return SendAsync(request, cancellationToken);
+        await SendAsync(request, ct);
     }
 
-    /// <inheritdoc />
-    public Task<PagedResponse<Client>> ListClients(Guid siteId, IFilter? filter = null, int? offset = null, int? limit = null, CancellationToken cancellationToken = default)
+    private async Task<T> PutAsJsonAsync<T>(string uri, object body, CancellationToken ct)
     {
-        string path = $"proxy/network/integration/v1/sites/{siteId}/clients";
-
-        string query = BuildPagingQuery(filter, offset, limit);
-
-        return GetFromJsonAsync<PagedResponse<Client>>(path + query, cancellationToken);
-    }
-
-    /// <inheritdoc />
-    public Task<Client> GetClient(Guid siteId, Guid clientId, CancellationToken cancellationToken = default)
-    {
-        string path = $"proxy/network/integration/v1/sites/{siteId}/clients/{clientId}";
-
-        return GetFromJsonAsync<Client>(path, cancellationToken);
-    }
-
-    /// <inheritdoc />
-    public Task<AuthorizeClientGuestAccessResponse> AuthorizeClientGuestAccess(Guid siteId, Guid clientId, long? timeLimitMinutes = null, long? dataUsageLimitMBytes = null, long? rxRateLimitKbps = null, long? txRateLimitKbps = null, CancellationToken cancellationToken = default)
-    {
-        string path = $"proxy/network/integration/v1/sites/{siteId}/clients/{clientId}/actions";
-        var requestBody = new
+        var request = new HttpRequestMessage(HttpMethod.Put, uri)
         {
-            action = ClientAction.AuthorizeGuestAccess,
-            timeLimitMinutes,
-            dataUsageLimitMBytes,
-            rxRateLimitKbps,
-            txRateLimitKbps
+            Content = JsonContent.Create(body)
         };
-        var request = new HttpRequestMessage(HttpMethod.Post, path)
+        return await SendAsync<T>(request, ct);
+    }
+
+    private async Task<T> PatchAsJsonAsync<T>(string uri, object body, CancellationToken ct)
+    {
+        var request = new HttpRequestMessage(HttpMethod.Patch, uri)
         {
-            Content = JsonContent.Create(requestBody)
+            Content = JsonContent.Create(body)
         };
-
-        return SendAsync<AuthorizeClientGuestAccessResponse>(request, cancellationToken);
+        return await SendAsync<T>(request, ct);
     }
 
-    /// <inheritdoc />
-    public Task<PagedResponse<Voucher>> ListVouchers(Guid siteId, IFilter? filter = null, int? offset = null, int? limit = null, CancellationToken cancellationToken = default)
+    private async Task DeleteAsync(string uri, CancellationToken ct)
     {
-        string path = $"proxy/network/integration/v1/sites/{siteId}/hotspot/vouchers";
-
-        string query = BuildPagingQuery(filter, offset, limit);
-
-        return GetFromJsonAsync<PagedResponse<Voucher>>(path + query, cancellationToken);
+        var request = new HttpRequestMessage(HttpMethod.Delete, uri);
+        await SendAsync(request, ct);
     }
 
-    /// <inheritdoc />
-    public async Task<IEnumerable<Voucher>> GenerateVouchers(Guid siteId, string name, long authorizedGuestLimit, long timeLimitMinutes, int? count = null, long? dataUsageLimitMBytes = null, long? rxRateLimitKbps = null, long? txRateLimitKbps = null, CancellationToken cancellationToken = default)
+    private async Task<T> DeleteAsync<T>(string uri, CancellationToken ct)
     {
-        string path = $"proxy/network/integration/v1/sites/{siteId}/hotspot/vouchers";
-
-        var requestBody = new
-        {
-            name,
-            authorizedGuestLimit,
-            timeLimitMinutes,
-            dataUsageLimitMBytes,
-            rxRateLimitKbps,
-            txRateLimitKbps,
-            count
-        };
-
-        var request = new HttpRequestMessage(HttpMethod.Post, path)
-        {
-            Content = JsonContent.Create(requestBody)
-        };
-
-        var result = await SendAsync<GenerateVouchersResponse>(request, cancellationToken);
-
-        return result.Vouchers;
-    }
-
-    /// <inheritdoc />
-    public async Task<long> DeleteVouchers(Guid siteId, IFilter filter, CancellationToken cancellationToken = default)
-    {
-        string path = $"proxy/network/integration/v1/sites/{siteId}/hotspot/vouchers";
-        string query = $"?filter={filter}";
-
-        var request = new HttpRequestMessage(HttpMethod.Delete, path + query);
-
-        var result = await SendAsync<DeleteVouchersResponse>(request, cancellationToken);
-
-        return result.VouchersDeleted;
-    }
-
-    /// <inheritdoc />
-    public Task<Voucher> GetVoucher(Guid siteId, Guid voucherId, CancellationToken cancellationToken = default)
-    {
-        string path = $"proxy/network/integration/v1/sites/{siteId}/hotspot/vouchers/{voucherId}";
-        return GetFromJsonAsync<Voucher>(path, cancellationToken);
-    }
-
-    /// <inheritdoc />
-    public async Task<long> DeleteVoucher(Guid siteId, Guid voucherId, CancellationToken cancellationToken = default)
-    {
-        string path = $"proxy/network/integration/v1/sites/{siteId}/hotspot/vouchers/{voucherId}";
-
-        var request = new HttpRequestMessage(HttpMethod.Delete, path);
-
-        var result = await SendAsync<DeleteVouchersResponse>(request, cancellationToken);
-
-        return result.VouchersDeleted;
+        var request = new HttpRequestMessage(HttpMethod.Delete, uri);
+        return await SendAsync<T>(request, ct);
     }
 
     private async Task<T> GetFromJsonAsync<T>(string requestUri, CancellationToken cancellationToken = default)
@@ -287,6 +174,7 @@ public class NetworkClient : INetworkClient
 
             throw result.StatusCode switch
             {
+                HttpStatusCode.BadRequest => new BadRequestException(result),
                 HttpStatusCode.NotFound => new NotFoundException(result),
                 HttpStatusCode.Unauthorized => new UnauthorizedException(result),
                 _ => new UniFiNetworkException(result)
@@ -312,9 +200,9 @@ public class NetworkClient : INetworkClient
 
     private static string BuildPagingQuery(IFilter? filter, int? offset, int? limit)
     {
-        string filterQuery = filter is not null ? $"&filter={filter}" : string.Empty;
-        string offsetQuery = offset.HasValue ? $"&offset={offset.Value}" : string.Empty;
-        string limitQuery = limit.HasValue ? $"&limit={limit.Value}" : string.Empty;
+        string filterQuery = filter is not null ? $"&filter={filter}" : String.Empty;
+        string offsetQuery = offset.HasValue ? $"&offset={offset.Value}" : String.Empty;
+        string limitQuery = limit.HasValue ? $"&limit={limit.Value}" : String.Empty;
         return $"?{filterQuery}{offsetQuery}{limitQuery}".TrimStart('&').TrimEnd('?');
     }
 

@@ -28,7 +28,7 @@ public abstract class ValueFilter<T>(string field, T value) : Filter(field) wher
     /// <see cref="DateTime"/> and <see cref="DateTimeOffset"/> values, the ISO 8601 format is used.</description>
     /// </item>
     /// <item>
-    /// <description>For other types, the <see cref="object.ToString"/> method is used.</description>
+    /// <description>For other types, the <see cref="Object.ToString"/> method is used.</description>
     /// </item>
     /// </list>
     /// If the value is of an unsupported type or <paramref name="value"/>.ToString() returns <see langword="null"/>, an <see cref="InvalidOperationException"/> is thrown.
