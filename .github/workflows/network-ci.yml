@@ -9,30 +9,84 @@ on:
       - "main"
   workflow_dispatch:
 
+permissions:
+  contents: read
+
+env:
+  NUGET_SOURCE: https://nuget.pkg.github.com/AndrewMcLachlan/index.json
+
 jobs:
   build:
     runs-on: ubuntu-latest
     permissions:
-      packages: write
+      contents: read
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
     - name: Setup .NET
-      uses: actions/setup-dotnet@v4
-      env:
-        NUGET_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
+      uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6
       with:
-        dotnet-version: 9.x
-        source-url: https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json
+        dotnet-version: |
+          8.x
+          9.x
+          10.x
+
     - name: Get version info
-      uses: andrewmclachlan/actions/get-version-number-from-project@v4
       id: get-version-number
+      uses: AndrewMcLachlan/Actions/get-version-number-from-project@d3e53c04be8287ab0c19ec485b0741a7d166ea31 # v4
       with:
         project: src/UniFi.Net.Network/UniFi.Net.Network.csproj
-    - name: Package
+
+    - name: Set package version
+      id: set-version
+      run: echo "package-version=${{ steps.get-version-number.outputs.major }}.${{ steps.get-version-number.outputs.minor }}.${{ steps.get-version-number.outputs.patch }}-ci.${{ github.run_number }}" >> $GITHUB_OUTPUT
+
+    - name: Restore
       run: |
-        dotnet pack src/UniFi.Net.Network -o ${{ github.workspace }}/publish --configuration Release --p:Version=${{ steps.get-version-number.outputs.major }}.${{ steps.get-version-number.outputs.minor }}.${{ steps.get-version-number.outputs.patch }}.0 \
-        --p:FileVersion=${{ steps.get-version-number.outputs.major }}.${{ steps.get-version-number.outputs.minor }}.${{ steps.get-version-number.outputs.patch }}.${{ github.run_number }} \
-        --p:PackageVersion=${{ steps.get-version-number.outputs.major }}.${{ steps.get-version-number.outputs.minor }}.${{ steps.get-version-number.outputs.patch }}-ci.${{ github.run_number }}
-    - name: Publish Packages
-      if: ((github.event_name == 'workflow_dispatch' || github.event_name == 'push') && github.ref == 'refs/heads/main')
-      run: dotnet nuget push ${{ github.workspace }}/publish/**/*.nupkg --api-key ${{secrets.GITHUB_TOKEN}} --skip-duplicate
+        dotnet restore src/UniFi.Net.Network
+        dotnet restore tests/UniFi.Net.Network.Tests
+
+    # Build once with the release version properties; test and pack reuse these binaries so the
+    # packed assemblies carry the intended versions.
+    - name: Build
+      run: |
+        dotnet build src/UniFi.Net.Network --no-restore --configuration Release --p:Version=${{ steps.get-version-number.outputs.major }}.${{ steps.get-version-number.outputs.minor }}.${{ steps.get-version-number.outputs.patch }}.0 --p:FileVersion=${{ steps.get-version-number.outputs.major }}.${{ steps.get-version-number.outputs.minor }}.${{ steps.get-version-number.outputs.patch }}.${{ github.run_number }} --p:InformationalVersion=${{ steps.set-version.outputs.package-version }}
+        dotnet build tests/UniFi.Net.Network.Tests --no-restore --configuration Release
+
+    # The integration tests need a live controller and user secrets; only the unit tests run in CI.
+    - name: Test
+      run: dotnet test tests/UniFi.Net.Network.Tests --no-build --configuration Release
+
+    - name: Package
+      run: dotnet pack src/UniFi.Net.Network --no-restore --no-build -o ${{ github.workspace }}/publish --configuration Release --p:Version=${{ steps.get-version-number.outputs.major }}.${{ steps.get-version-number.outputs.minor }}.${{ steps.get-version-number.outputs.patch }}.0 --p:PackageVersion=${{ steps.set-version.outputs.package-version }}
+
+    - name: Upload packages
+      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+      with:
+        name: packages
+        path: |
+          ${{ github.workspace }}/publish/*.nupkg
+          ${{ github.workspace }}/publish/*.snupkg
+        retention-days: 30
+
+  publish-github-packages:
+    needs: build
+    if: (github.event_name == 'workflow_dispatch' || github.event_name == 'push') && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+      contents: read
+    steps:
+    - name: Download packages
+      uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+      with:
+        name: packages
+        path: ${{ github.workspace }}/publish
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6
+      with:
+        dotnet-version: 10.x
+
+    # No rebuild here: this publishes exactly the artifacts validated by the build job above.
+    - name: Publish packages
+      run: dotnet nuget push ${{ github.workspace }}/publish/*.nupkg --api-key ${{ secrets.GITHUB_TOKEN }} --source ${{ env.NUGET_SOURCE }} --skip-duplicate

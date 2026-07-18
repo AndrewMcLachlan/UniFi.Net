@@ -1,5 +1,8 @@
 name: Network Release
 
+# Publishes UniFi.Net.Network to nuget.org via NuGet Trusted Publishing (OIDC, no long-lived API
+# key stored in this repo). Triggered manually so releases to the public feed are always
+# deliberate. The version comes from the project file; a prerelease run appends -beta.<run_number>.
 on:
   workflow_dispatch:
     inputs:
@@ -10,38 +13,117 @@ on:
 
 permissions:
   contents: read
-  id-token: write
 
 jobs:
-  build:
+  validate:
     runs-on: ubuntu-latest
-    if: ${{ github.ref == 'refs/heads/main' }}
+    # Stable runs are expected to be dispatched FROM the version tag ref, not from main.
+    if: ${{ github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v') }}
+    permissions:
+      contents: read
     steps:
-    - uses: actions/checkout@v4
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v4
-      env:
-        NUGET_AUTH_TOKEN: ${{secrets.NUGET_API_KEY}}
+    - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
       with:
-        dotnet-version: 9.x
-        source-url: https://api.nuget.org/v3/index.json
+        fetch-depth: 0
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6
+      with:
+        dotnet-version: |
+          8.x
+          9.x
+          10.x
+
     - name: Get version info
-      uses: andrewmclachlan/actions/get-version-number-from-project@v4
       id: get-version-number
+      uses: AndrewMcLachlan/Actions/get-version-number-from-project@d3e53c04be8287ab0c19ec485b0741a7d166ea31 # v4
       with:
         project: src/UniFi.Net.Network/UniFi.Net.Network.csproj
-    - name: Set version variable
-      id: set-ver
+
+    - name: Set package version
+      id: set-version
       run: |
         if [ "${{ inputs.isprerelease }}" = "true" ]; then
-          echo "ver=${{ steps.get-version-number.outputs.major }}.${{ steps.get-version-number.outputs.minor }}.${{ steps.get-version-number.outputs.patch }}-beta.${{ github.run_number }}" >> $GITHUB_ENV
+          echo "package-version=${{ steps.get-version-number.outputs.major }}.${{ steps.get-version-number.outputs.minor }}.${{ steps.get-version-number.outputs.patch }}-beta.${{ github.run_number }}" >> $GITHUB_OUTPUT
         else
-          echo "ver=${{ steps.get-version-number.outputs.major }}.${{ steps.get-version-number.outputs.minor }}.${{ steps.get-version-number.outputs.patch }}" >> $GITHUB_ENV
+          echo "package-version=${{ steps.get-version-number.outputs.major }}.${{ steps.get-version-number.outputs.minor }}.${{ steps.get-version-number.outputs.patch }}" >> $GITHUB_OUTPUT
         fi
-    - name: Package
+
+    # Anchors a stable publish to a specific, reviewed, protected tag instead of whatever main
+    # happens to be at dispatch time.
+    - name: Verify release tag (stable only)
+      if: ${{ !inputs.isprerelease }}
       run: |
-        dotnet pack src/UniFi.Net.Network -o ${{ github.workspace }}/publish --configuration Release --p:Version=${{ steps.get-version-number.outputs.major }}.${{ steps.get-version-number.outputs.minor }}.${{ steps.get-version-number.outputs.patch }}.0 \
-        --p:FileVersion=${{ steps.get-version-number.outputs.major }}.${{ steps.get-version-number.outputs.minor }}.${{ steps.get-version-number.outputs.patch }}.${{ github.run_number }} \
-        --p:PackageVersion=${{env.ver}}
-    - name: Publish Packages
-      run: dotnet nuget push ${{ github.workspace }}/publish/**/*.nupkg --api-key ${{secrets.NUGET_API_KEY}} --skip-duplicate
+        TAG="v${{ steps.get-version-number.outputs.major }}.${{ steps.get-version-number.outputs.minor }}.${{ steps.get-version-number.outputs.patch }}"
+        # A commit can carry several tags; check membership rather than a single reported tag.
+        if ! git tag --points-at HEAD | grep -Fxq "$TAG"; then
+          ACTUAL=$(git tag --points-at HEAD | paste -sd, - )
+          echo "::error::Stable releases must run from the exact version tag $TAG (HEAD is '$ACTUAL')."
+          exit 1
+        fi
+
+    - name: Restore
+      run: |
+        dotnet restore src/UniFi.Net.Network
+        dotnet restore tests/UniFi.Net.Network.Tests
+
+    # Build once with the release version properties; test and pack reuse these binaries so the
+    # packed assemblies carry the intended versions.
+    - name: Build
+      run: |
+        dotnet build src/UniFi.Net.Network --no-restore --configuration Release --p:Version=${{ steps.get-version-number.outputs.major }}.${{ steps.get-version-number.outputs.minor }}.${{ steps.get-version-number.outputs.patch }}.0 --p:FileVersion=${{ steps.get-version-number.outputs.major }}.${{ steps.get-version-number.outputs.minor }}.${{ steps.get-version-number.outputs.patch }}.${{ github.run_number }} --p:InformationalVersion=${{ steps.set-version.outputs.package-version }}
+        dotnet build tests/UniFi.Net.Network.Tests --no-restore --configuration Release
+
+    # The integration tests need a live controller and user secrets; only the unit tests run in CI.
+    - name: Test
+      run: dotnet test tests/UniFi.Net.Network.Tests --no-build --configuration Release
+
+    - name: Package
+      run: dotnet pack src/UniFi.Net.Network --no-restore --no-build -o ${{ github.workspace }}/publish --configuration Release --p:Version=${{ steps.get-version-number.outputs.major }}.${{ steps.get-version-number.outputs.minor }}.${{ steps.get-version-number.outputs.patch }}.0 --p:PackageVersion=${{ steps.set-version.outputs.package-version }}
+
+    - name: Upload packages
+      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+      with:
+        name: packages
+        path: |
+          ${{ github.workspace }}/publish/*.nupkg
+          ${{ github.workspace }}/publish/*.snupkg
+        retention-days: 90
+
+  publish:
+    needs: validate
+    runs-on: ubuntu-latest
+    # Protected environment - publishing waits for manual approval before the OIDC exchange.
+    environment: nuget.org
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+    - name: Download packages
+      uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+      with:
+        name: packages
+        path: ${{ github.workspace }}/publish
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6
+      with:
+        dotnet-version: 10.x
+
+    # NuGet Trusted Publishing: exchanges this job's GitHub OIDC token for a short-lived (1 hour)
+    # nuget.org API key. Requires a Trusted Publishing policy configured on nuget.org for this
+    # repo/workflow (scoped to the "nuget.org" environment) and the NUGET_USER repository variable
+    # set to the nuget.org profile name. See https://learn.microsoft.com/nuget/nuget-org/trusted-publishing
+    - name: NuGet login (OIDC)
+      id: login
+      uses: NuGet/login@8d196754b4036150537f80ac539e15c2f1028841 # v1
+      with:
+        user: ${{ vars.NUGET_USER }}
+
+    # No rebuild here: this publishes exactly the artifacts validated by the validate job above.
+    # The matching .snupkg symbol packages are pushed automatically alongside each .nupkg because
+    # both sit in the same downloaded folder - do not separate them into subfolders.
+    # --skip-duplicate: retries re-publish the identical validated artifacts from this run's
+    # upload, so skipping already-pushed IDs is safe and enables partial-failure retry.
+    - name: Publish to NuGet.org
+      run: dotnet nuget push ${{ github.workspace }}/publish/*.nupkg --api-key ${{ steps.login.outputs.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
