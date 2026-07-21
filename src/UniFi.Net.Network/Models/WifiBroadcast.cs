@@ -57,6 +57,8 @@ public record WifiBroadcastSummary(
 /// <param name="ClientIsolationEnabled">Indicates if client isolation is enabled.</param>
 /// <param name="HideName">Indicates if the SSID name is hidden.</param>
 /// <param name="UapsdEnabled">Indicates if U-APSD is enabled.</param>
+/// <param name="Channel2gLockedTo6">Indicates if the 2.4 GHz channel is locked to channel 6.</param>
+/// <param name="DtimPeriod2gLockedTo3">Indicates if the 2.4 GHz DTIM period is locked to 3.</param>
 public record WifiBroadcast(
     Guid Id,
     string Name,
@@ -69,7 +71,9 @@ public record WifiBroadcast(
     bool? MulticastToUnicastConversionEnabled,
     bool? ClientIsolationEnabled,
     bool? HideName,
-    bool? UapsdEnabled
+    bool? UapsdEnabled,
+    bool? Channel2gLockedTo6 = null,
+    bool? DtimPeriod2gLockedTo3 = null
 );
 
 /// <summary>

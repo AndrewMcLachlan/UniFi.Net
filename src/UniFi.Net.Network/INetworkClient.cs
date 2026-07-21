@@ -331,6 +331,70 @@ public interface INetworkClient
 
     #endregion
 
+    #region Switching
+
+    /// <summary>
+    /// Gets a list of link aggregation groups (LAGs) for a site.
+    /// </summary>
+    /// <param name="siteId">The site ID.</param>
+    /// <param name="filter">A filter expression.</param>
+    /// <param name="offset">The number of LAGs to offset.</param>
+    /// <param name="limit">The maximum number of LAGs to return (max 200).</param>
+    /// <param name="cancellationToken">A <see cref="CancellationToken"/> to observe while waiting for the task to complete.</param>
+    /// <returns>A paged response of LAGs.</returns>
+    Task<PagedResponse<Lag>> ListLags(Guid siteId, IFilter? filter = null, int? offset = null, int? limit = null, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Gets a specific link aggregation group (LAG) by its ID.
+    /// </summary>
+    /// <param name="siteId">The site ID.</param>
+    /// <param name="lagId">The LAG ID.</param>
+    /// <param name="cancellationToken">A <see cref="CancellationToken"/> to observe while waiting for the task to complete.</param>
+    /// <returns>LAG details.</returns>
+    Task<Lag> GetLag(Guid siteId, Guid lagId, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Gets a list of multi-chassis LAG (MC-LAG) domains for a site.
+    /// </summary>
+    /// <param name="siteId">The site ID.</param>
+    /// <param name="filter">A filter expression.</param>
+    /// <param name="offset">The number of MC-LAG domains to offset.</param>
+    /// <param name="limit">The maximum number of MC-LAG domains to return (max 200).</param>
+    /// <param name="cancellationToken">A <see cref="CancellationToken"/> to observe while waiting for the task to complete.</param>
+    /// <returns>A paged response of MC-LAG domains.</returns>
+    Task<PagedResponse<McLagDomain>> ListMcLagDomains(Guid siteId, IFilter? filter = null, int? offset = null, int? limit = null, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Gets a specific multi-chassis LAG (MC-LAG) domain by its ID.
+    /// </summary>
+    /// <param name="siteId">The site ID.</param>
+    /// <param name="mcLagDomainId">The MC-LAG domain ID.</param>
+    /// <param name="cancellationToken">A <see cref="CancellationToken"/> to observe while waiting for the task to complete.</param>
+    /// <returns>MC-LAG domain details.</returns>
+    Task<McLagDomain> GetMcLagDomain(Guid siteId, Guid mcLagDomainId, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Gets a list of switch stacks for a site.
+    /// </summary>
+    /// <param name="siteId">The site ID.</param>
+    /// <param name="filter">A filter expression.</param>
+    /// <param name="offset">The number of switch stacks to offset.</param>
+    /// <param name="limit">The maximum number of switch stacks to return (max 200).</param>
+    /// <param name="cancellationToken">A <see cref="CancellationToken"/> to observe while waiting for the task to complete.</param>
+    /// <returns>A paged response of switch stacks.</returns>
+    Task<PagedResponse<SwitchStack>> ListSwitchStacks(Guid siteId, IFilter? filter = null, int? offset = null, int? limit = null, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Gets a specific switch stack by its ID.
+    /// </summary>
+    /// <param name="siteId">The site ID.</param>
+    /// <param name="switchStackId">The switch stack ID.</param>
+    /// <param name="cancellationToken">A <see cref="CancellationToken"/> to observe while waiting for the task to complete.</param>
+    /// <returns>Switch stack details.</returns>
+    Task<SwitchStack> GetSwitchStack(Guid siteId, Guid switchStackId, CancellationToken cancellationToken = default);
+
+    #endregion
+
     #region Firewall Zones
 
     /// <summary>
