@@ -16,7 +16,6 @@ public class SiteManagerClient : ISiteManagerClient
     private readonly IHttpClientFactory _httpClientFactory;
 
     private const string Version = "v1";
-    private const string EarlyAccess = "ea";
 
     /// <summary>
     /// Initializes a new instance of the <see cref="SiteManagerClient"/> class using an <see cref="IHttpClientFactory"/>.
@@ -110,7 +109,7 @@ public class SiteManagerClient : ISiteManagerClient
     /// <inheritdoc/>
     public Task<DataResponse<IReadOnlyList<IspMetric>>> GetIspMetricsAsync(MetricInterval type, DateTimeOffset? beginTimestamp = null, DateTimeOffset? endTimestamp = null, CancellationToken cancellationToken = default)
     {
-        string url = $"{EarlyAccess}/isp-metrics/{type}";
+        string url = $"{Version}/isp-metrics/{type}";
 
         Dictionary<string, StringValues> queryParams = new()
         {
@@ -124,7 +123,7 @@ public class SiteManagerClient : ISiteManagerClient
     /// <inheritdoc/>
     public Task<DataResponse<IReadOnlyList<IspMetric>>> GetIspMetricsAsync(MetricInterval type, string? duration = null, CancellationToken cancellationToken = default)
     {
-        string url = $"{EarlyAccess}/isp-metrics/{type}";
+        string url = $"{Version}/isp-metrics/{type}";
 
         Dictionary<string, StringValues> queryParams = new()
         {
@@ -137,7 +136,7 @@ public class SiteManagerClient : ISiteManagerClient
     /// <inheritdoc/>
     public Task<DataResponse<IReadOnlyList<IspMetric>>> QueryIspMetricsAsync(MetricInterval type, IEnumerable<IspMetricsQuery> sites, CancellationToken cancellationToken = default)
     {
-        string url = $"{EarlyAccess}/isp-metrics/{type}/query";
+        string url = $"{Version}/isp-metrics/{type}/query";
 
         return PostJsonAsync<IEnumerable<IspMetricsQuery>, DataResponse<IReadOnlyList<IspMetric>>>(url, sites, cancellationToken);
     }
@@ -145,7 +144,7 @@ public class SiteManagerClient : ISiteManagerClient
     /// <inheritdoc/>
     public Task<DataResponse<IReadOnlyList<BasicSDWanConfig>>> ListSDWanConfigsAsync(CancellationToken cancellationToken = default)
     {
-        const string url = $"{EarlyAccess}/sd-wan-configs";
+        const string url = $"{Version}/sd-wan-configs";
 
         return GetFromJsonAsync<DataResponse<IReadOnlyList<BasicSDWanConfig>>>(url, cancellationToken);
     }
@@ -153,7 +152,7 @@ public class SiteManagerClient : ISiteManagerClient
     /// <inheritdoc/>
     public Task<DataResponse<SDWanConfig>> GetSDWanConfigAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        string url = $"{EarlyAccess}/sd-wan-configs/{id}";
+        string url = $"{Version}/sd-wan-configs/{id}";
 
         return GetFromJsonAsync<DataResponse<SDWanConfig>>(url, cancellationToken);
     }
@@ -161,7 +160,7 @@ public class SiteManagerClient : ISiteManagerClient
     /// <inheritdoc/>
     public Task<DataResponse<SDWanConfigStatus>> GetSDWanConfigStatusAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        string url = $"{EarlyAccess}/sd-wan-configs/{id}/status";
+        string url = $"{Version}/sd-wan-configs/{id}/status";
 
         return GetFromJsonAsync<DataResponse<SDWanConfigStatus>>(url, cancellationToken);
     }
