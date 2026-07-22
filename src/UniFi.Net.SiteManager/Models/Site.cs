@@ -3,7 +3,7 @@ using System.Text.Json.Serialization;
 namespace UniFi.Net.SiteManager.Models;
 
 /// <summary>
-///
+/// Represents a site managed by a host.
 /// </summary>
 /// <param name="SiteId">Unique identifier of the site.</param>
 /// <param name="HostId">Unique identifier of the host device managing this site.</param>
@@ -34,16 +34,30 @@ public record SiteMeta(
     [property:JsonPropertyName("timezone")]string TimeZone
 );
 
-
+/// <summary>
+/// Site statistics.
+/// </summary>
+/// <param name="Counts">Device and client counts, keyed by count name.</param>
+/// <param name="Gateway">Gateway information.</param>
+/// <param name="InternetIssues">Internet issues reported for the site.</param>
+/// <param name="IspInfo">ISP information.</param>
+/// <param name="Percentages">Percentage metrics, keyed by metric name.</param>
 public record SiteStatistics(
     IReadOnlyDictionary<string, int> Counts,
     SiteGateway Gateway,
-    IReadOnlyList<object> InternetIssues, // Use a more specific type if known
+    IReadOnlyList<object> InternetIssues,
     SiteIspInfo IspInfo,
     IReadOnlyDictionary<string, int> Percentages
 );
 
-
+/// <summary>
+/// Gateway information for a site.
+/// </summary>
+/// <param name="HardwareId">Hardware identifier of the gateway.</param>
+/// <param name="InspectionState">The traffic inspection state.</param>
+/// <param name="IpsMode">The intrusion prevention system mode.</param>
+/// <param name="IpsSignature">The intrusion prevention system signature information.</param>
+/// <param name="Shortname">Short identifier of the gateway model.</param>
 public record SiteGateway(
     string HardwareId,
     string InspectionState,
@@ -52,6 +66,11 @@ public record SiteGateway(
     string Shortname
 );
 
+/// <summary>
+/// Intrusion prevention system signature information.
+/// </summary>
+/// <param name="RulesCount">The number of rules in the signature set.</param>
+/// <param name="Type">The signature set type.</param>
 public record SiteIpsSignature(
     int RulesCount,
     string Type

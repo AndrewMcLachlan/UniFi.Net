@@ -5,7 +5,7 @@
 /// </summary>
 /// <param name="HostId">Unique identifier of the host device.</param>
 /// <param name="HostName">Name of the host device.</param>
-/// <param name="Devices">Array of devices managed by this host.+</param>
+/// <param name="Devices">Array of devices managed by this host.</param>
 /// <param name="UpdatedAt">Last update time.</param>
 public record HostWithDevices(
     string HostId,

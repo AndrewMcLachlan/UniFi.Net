@@ -3,6 +3,8 @@
     <File Path=".github/CODEOWNERS" />
     <File Path=".github/workflows/network-ci.yml" />
     <File Path=".github/workflows/network-release.yml" />
+    <File Path=".github/workflows/sitemanager-ci.yml" />
+    <File Path=".github/workflows/sitemanager-release.yml" />
   </Folder>
   <Folder Name="/Solution Items/">
     <File Path=".editorconfig" />
@@ -12,6 +14,7 @@
   <Folder Name="/tests/">
     <Project Path="tests/UniFi.Net.Network.Tests/UniFi.Net.Network.Tests.csproj" Id="f7a46982-6089-48fb-981d-d3d82b962771" />
     <Project Path="tests/UniFi.Net.Network.IntegrationTests/UniFi.Net.Network.IntegrationTests.csproj" />
+    <Project Path="tests/UniFi.Net.SiteManager.Tests/UniFi.Net.SiteManager.Tests.csproj" />
     <Project Path="tests/UniFi.Net.TestHarness/UniFi.Net.TestHarness.csproj" />
   </Folder>
   <Project Path="src/UniFi.Net.Access/UniFi.Net.Access.csproj" />
