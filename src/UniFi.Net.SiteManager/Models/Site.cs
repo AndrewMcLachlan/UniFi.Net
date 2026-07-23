@@ -47,7 +47,7 @@ public record SiteStatistics(
     SiteGateway Gateway,
     IReadOnlyList<object> InternetIssues,
     SiteIspInfo IspInfo,
-    IReadOnlyDictionary<string, int> Percentages
+    IReadOnlyDictionary<string, double> Percentages
 );
 
 /// <summary>

@@ -281,7 +281,7 @@ public class SiteManagerClient : ISiteManagerClient
         }
         var query = String.Join("&", queryParams.Where(kvp => !String.IsNullOrWhiteSpace(kvp.Key) && !String.IsNullOrWhiteSpace(queryParams[kvp.Key]))
             .SelectMany(kvp => queryParams[kvp.Key].Where(v => !String.IsNullOrWhiteSpace(v)).Select(v => $"{kvp.Key}={Uri.EscapeDataString(v!)}")));
-        return "?" + query;
+        return String.IsNullOrEmpty(query) ? String.Empty : "?" + query;
     }
 
     private static IHttpClientFactory CreateFactory(Uri host, string apiKey)

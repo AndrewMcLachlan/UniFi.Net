@@ -177,7 +177,7 @@ public class SiteManagerModelTests
                         },
                         "internetIssues": [],
                         "ispInfo": { "name": "Vodafone", "organization": "Vodafone Portugal" },
-                        "percentages": { "txRetry": 2, "wanUptime": 99 }
+                        "percentages": { "txRetry": 2.5, "wanUptime": 99.98 }
                     },
                     "permission": "admin",
                     "isOwner": false
@@ -198,7 +198,9 @@ public class SiteManagerModelTests
         Assert.Equal(5, site.Statistics.Counts["totalDevice"]);
         Assert.Equal(43416, site.Statistics.Gateway.IpsSignature.RulesCount);
         Assert.Equal("Vodafone", site.Statistics.IspInfo.Name);
-        Assert.Equal(99, site.Statistics.Percentages["wanUptime"]);
+        // Regression: the live API returns fractional percentages (e.g. txRetry 2.5).
+        Assert.Equal(2.5, site.Statistics.Percentages["txRetry"]);
+        Assert.Equal(99.98, site.Statistics.Percentages["wanUptime"]);
         Assert.Equal("admin", site.Permission);
     }
 
