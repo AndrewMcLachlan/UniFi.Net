@@ -5,8 +5,7 @@ internal partial class SiteManagerClient
     private async Task DoDevices(CancellationToken cancellationToken)
     {
         Clear();
-        WriteLine("Devices");
-        WriteLine("-------");
+        WriteHeading("Devices");
 
         var devices = await client.ListDevicesAsync(cancellationToken: cancellationToken);
 

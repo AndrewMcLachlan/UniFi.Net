@@ -93,51 +93,47 @@ public partial class NetworkClient(INetworkClient uniFiClient)
 
     private (int, object?) PrintMenu()
     {
-        Clear();
-        WriteLine("Unifi Network Client Test Harness");
-        WriteLine("-------------------------");
+        var title = "Unifi Network Client Test Harness";
         if (SelectedSite is not null)
         {
-            WriteLine($"Current site is {SelectedSite.Name}");
-            WriteLine("-------------------------");
+            title += $"\nCurrent site is {SelectedSite.Name}";
         }
         if (SelectedDevice is not null)
         {
-            WriteLine($"Current device is {SelectedDevice.Name}");
-            WriteLine("-------------------------");
+            title += $"\nCurrent device is {SelectedDevice.Name}";
         }
         if (SelectedClient is not null)
         {
-            WriteLine($"Current client is {SelectedClient.Name}");
-            WriteLine("-------------------------");
+            title += $"\nCurrent client is {SelectedClient.Name}";
         }
-        WriteLine("1. Info");
-        WriteLine("2. Sites");
-        WriteLine("3. Devices");
-        WriteLine("4. Clients");
-        WriteLine("5. Port Actions");
-        WriteLine("6. Device Actions");
-        WriteLine("7. Client Actions");
-        WriteLine("8. Vouchers");
-        WriteLine("9. All read endpoints");
-        WriteLine($"{NetworkExitOption}. Main menu");
-        Write("Select an option: ");
 
-        var input = ReadKey();
-        WriteLine();
+        var option = PromptOption(
+            title,
+            [
+                "Info",
+                "Sites",
+                "Devices",
+                "Clients",
+                "Port Actions",
+                "Device Actions",
+                "Client Actions",
+                "Vouchers",
+                "All read endpoints",
+            ],
+            "Main menu");
 
-        return input.KeyChar switch
+        return option switch
         {
-            '1' => (1, null),
-            '2' => (2, PrintSitesMenu()), // List Devices
-            '3' => (3, PrintDevicesMenu()), // Get Device Details
-            '4' => (4, PrintClientsMenu()), // List Clients
-            '5' => (5, PrintPortActionsMenu()), // Port Actions
-            '6' => (6, PrintDeviceActionsMenu()), // Device Actions
-            '7' => (7, PrintClientActionsMenu()),
-            '8' => (8, PrintVouchersMenu()),
-            '9' => (9, null), // All read endpoints
-            '0' => (NetworkExitOption, null), // Exit
+            1 => (1, null),
+            2 => (2, PrintSitesMenu()),
+            3 => (3, PrintDevicesMenu()),
+            4 => (4, PrintClientsMenu()),
+            5 => (5, PrintPortActionsMenu()),
+            6 => (6, PrintDeviceActionsMenu()),
+            7 => (7, PrintClientActionsMenu()),
+            8 => (8, PrintVouchersMenu()),
+            9 => (9, null), // All read endpoints
+            0 => (NetworkExitOption, null), // Back to main menu
             _ => (-1, null)
         };
     }

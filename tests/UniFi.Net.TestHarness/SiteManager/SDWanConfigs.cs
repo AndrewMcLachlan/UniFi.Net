@@ -58,8 +58,7 @@ internal partial class SiteManagerClient
     private static void PrintConfig(SDWanConfig config)
     {
         Clear();
-        WriteLine("SD-WAN Config");
-        WriteLine("-------------");
+        WriteHeading("SD-WAN Config");
         WriteLine($"Id:      {config.Id}");
         WriteLine($"Name:    {config.Name}");
         WriteLine($"Type:    {config.Type}");
@@ -85,8 +84,7 @@ internal partial class SiteManagerClient
     private static void PrintStatus(SDWanConfigStatus status)
     {
         Clear();
-        WriteLine("SD-WAN Config Status");
-        WriteLine("--------------------");
+        WriteHeading("SD-WAN Config Status");
         WriteLine($"Id:              {status.Id}");
         WriteLine($"Fingerprint:     {status.Fingerprint}");
         WriteLine($"Generate status: {status.GenerateStatus}");

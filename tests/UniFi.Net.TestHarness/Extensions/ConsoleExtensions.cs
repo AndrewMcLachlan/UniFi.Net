@@ -6,7 +6,10 @@ internal static class ConsoleExtensions
         public static void PressAnyKeyToContinue()
         {
             Console.WriteLine();
+            var original = Console.ForegroundColor;
+            Console.ForegroundColor = ConsoleColor.DarkGray;
             Console.WriteLine("Press any key to continue...");
+            Console.ForegroundColor = original;
             Console.ReadKey(true);
         }
     }
@@ -23,37 +26,68 @@ internal static class ConsoleExtensions
     }
 
     /// <summary>
+    /// Writes a cyan heading with an underline.
+    /// </summary>
+    public static void WriteHeading(string heading)
+    {
+        var original = Console.ForegroundColor;
+        var lines = heading.Split('\n');
+
+        Console.ForegroundColor = ConsoleColor.Cyan;
+        Console.WriteLine(lines[0]);
+
+        Console.ForegroundColor = ConsoleColor.DarkCyan;
+        foreach (var line in lines.Skip(1))
+        {
+            Console.WriteLine(line);
+        }
+
+        Console.ForegroundColor = ConsoleColor.DarkGray;
+        Console.WriteLine(new string('-', Math.Max(8, lines.Max(l => l.Length))));
+        Console.ForegroundColor = original;
+    }
+
+    /// <summary>
     /// Clears the console, renders a titled numbered menu and returns the chosen
     /// 1-based option, or 0 for the back option. Re-prompts until the input is valid.
-    /// Handles any number of options (input is read as a full line).
+    /// Menus with up to nine options take a single key press; larger menus read a full line.
     /// </summary>
     public static int PromptOption(string title, IReadOnlyList<string> options, string backLabel = "Back")
     {
         while (true)
         {
             Console.Clear();
-            foreach (var line in title.Split('\n'))
-            {
-                Console.WriteLine(line);
-            }
-            Console.WriteLine(new string('-', Math.Max(8, title.Split('\n').Max(l => l.Length))));
+            WriteHeading(title);
+
+            var original = Console.ForegroundColor;
             for (int i = 0; i < options.Count; i++)
             {
-                Console.WriteLine($"{i + 1}. {options[i]}");
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.Write($"{i + 1}. ");
+                Console.ForegroundColor = original;
+                Console.WriteLine(options[i]);
             }
+            Console.ForegroundColor = ConsoleColor.DarkGray;
             Console.WriteLine($"0. {backLabel}");
-            Console.Write("Select an option (and press enter): ");
+            Console.ForegroundColor = original;
 
-            var input = Console.ReadLine();
+            int? choice;
+            if (options.Count <= 9)
+            {
+                Console.Write("Select an option: ");
+                choice = Int32.TryParse(Console.ReadKey(true).KeyChar.ToString(), out var key) ? key : null;
+            }
+            else
+            {
+                Console.Write("Select an option (and press enter): ");
+                choice = Int32.TryParse(Console.ReadLine(), out var line) ? line : null;
+            }
 
-            if (Int32.TryParse(input, out var option) && option >= 0 && option <= options.Count)
+            if (choice is int option && option >= 0 && option <= options.Count)
             {
                 Console.WriteLine();
                 return option;
             }
-
-            WriteError("Invalid option, please try again.");
-            Console.PressAnyKeyToContinue();
         }
     }
 

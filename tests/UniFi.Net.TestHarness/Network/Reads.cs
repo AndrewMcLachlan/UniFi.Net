@@ -70,8 +70,7 @@ public partial class NetworkClient
             }
 
             Clear();
-            WriteLine(entries[choice - 1].Name);
-            WriteLine(new string('-', entries[choice - 1].Name.Length));
+            WriteHeading(entries[choice - 1].Name);
 
             try
             {

@@ -35,8 +35,7 @@ internal partial class SiteManagerClient
     private static void PrintHost(Host host)
     {
         Clear();
-        WriteLine("Host Details");
-        WriteLine("------------");
+        WriteHeading("Host Details");
         WriteLine($"Id:                {host.Id}");
         WriteLine($"Hardware Id:       {host.HardwareId}");
         WriteLine($"Type:              {host.Type}");

@@ -62,8 +62,7 @@ internal partial class SiteManagerClient
 
     private static void PrintMetrics(IReadOnlyList<IspMetric> metrics)
     {
-        WriteLine("ISP Metrics");
-        WriteLine("-----------");
+        WriteHeading("ISP Metrics");
 
         foreach (var metric in metrics)
         {

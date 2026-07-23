@@ -5,8 +5,7 @@ internal partial class SiteManagerClient
     private async Task DoSites(CancellationToken cancellationToken)
     {
         Clear();
-        WriteLine("Sites");
-        WriteLine("-----");
+        WriteHeading("Sites");
 
         var sites = await client.ListSitesAsync(cancellationToken: cancellationToken);
 
