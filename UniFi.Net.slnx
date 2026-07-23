@@ -3,6 +3,8 @@
     <File Path=".github/CODEOWNERS" />
     <File Path=".github/workflows/network-ci.yml" />
     <File Path=".github/workflows/network-release.yml" />
+    <File Path=".github/workflows/prepare-network-release.yml" />
+    <File Path=".github/workflows/prepare-sitemanager-release.yml" />
     <File Path=".github/workflows/sitemanager-ci.yml" />
     <File Path=".github/workflows/sitemanager-release.yml" />
   </Folder>
