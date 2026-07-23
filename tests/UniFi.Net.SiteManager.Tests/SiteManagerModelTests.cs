@@ -121,6 +121,25 @@ public class SiteManagerModelTests
                                 "id": "e85485da-54c3-4906-8f19-3cef4116ff02",
                                 "images": { "default": "3008400039c483c496f4ad820242c447" }
                             }
+                        },
+                        {
+                            "id": "784558E80E01",
+                            "mac": "784558E80E01",
+                            "name": "Third Party Device",
+                            "model": null,
+                            "shortname": null,
+                            "ip": "192.168.1.50",
+                            "productLine": null,
+                            "status": "offline",
+                            "version": null,
+                            "firmwareStatus": null,
+                            "updateAvailable": null,
+                            "isConsole": false,
+                            "isManaged": false,
+                            "startupTime": null,
+                            "adoptionTime": null,
+                            "note": null,
+                            "uidb": { "guid": null, "id": null, "images": null }
                         }
                     ],
                     "updatedAt": "2024-06-23T03:59:52Z"
@@ -138,11 +157,20 @@ public class SiteManagerModelTests
         var host = Assert.Single(response.Data);
         Assert.Equal("Dream Machine Special Edition", host.HostName);
         Assert.Equal(new DateTimeOffset(2024, 6, 23, 3, 59, 52, TimeSpan.Zero), host.UpdatedAt);
-        var device = Assert.Single(host.Devices);
+        Assert.Equal(2, host.Devices.Count);
+        var device = host.Devices[0];
         Assert.Equal("UDMPROSE", device.ShortName);
         Assert.True(device.IsConsole);
         Assert.Null(device.UpdateAvailable);
+        Assert.NotNull(device.Uidb);
+        Assert.NotNull(device.Uidb.Images);
         Assert.Equal("3008400039c483c496f4ad820242c447", device.Uidb.Images["default"]);
+        // Regression: third-party/unadopted devices report null uidb fields and startup time.
+        var thirdParty = host.Devices[1];
+        Assert.Null(thirdParty.StartupTime);
+        Assert.NotNull(thirdParty.Uidb);
+        Assert.Null(thirdParty.Uidb.Guid);
+        Assert.Null(thirdParty.Uidb.Images);
     }
 
     [Fact]

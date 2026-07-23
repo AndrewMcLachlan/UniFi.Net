@@ -36,10 +36,10 @@ public record Device(
     string? UpdateAvailable,
     bool IsConsole,
     bool IsManaged,
-    DateTimeOffset StartupTime,
+    DateTimeOffset? StartupTime,
     DateTimeOffset? AdoptionTime,
     string? Note,
-    Uidb Uidb
+    Uidb? Uidb
 );
 
 /// <summary>
@@ -49,7 +49,7 @@ public record Device(
 /// <param name="Id">Identifier for the UI metadata.</param>
 /// <param name="Images">Images associated with the device.</param>
 public record Uidb(
-    Guid Guid,
-    string Id,
-    IDictionary<string, string> Images
+    Guid? Guid,
+    string? Id,
+    IReadOnlyDictionary<string, string>? Images
 );
