@@ -1,4 +1,4 @@
-﻿using UniFi.Net.SiteManager;
+using UniFi.Net.SiteManager;
 using UniFi.Net.SiteManager.Models;
 
 namespace UniFi.Net.TestHarness.SiteManager;
@@ -7,56 +7,72 @@ internal partial class SiteManagerClient(ISiteManagerClient client)
 {
     private Host? SelectedHost { get; set; }
 
+    private BasicSDWanConfig? SelectedSDWanConfig { get; set; }
+
     public async Task StartAsync(CancellationToken cancellationToken)
     {
-        var hosts = await client.ListHostsAsync(cancellationToken: cancellationToken);
-
-        SelectedHost = hosts.Data.Count > 0 ? hosts.Data[0] : null;
-
-        (int Primary, int? Secondary) action = (0, null);
-        while (action.Primary != 5 && !cancellationToken.IsCancellationRequested)
+        try
         {
-            action = PrintMenu();
+            var hosts = await client.ListHostsAsync(cancellationToken: cancellationToken);
+            SelectedHost = hosts.Data.Count > 0 ? hosts.Data[0] : null;
+        }
+        catch (Exception ex)
+        {
+            WriteError($"Could not list hosts: {ex.Message}");
+            PressAnyKeyToContinue();
+        }
 
-            await DoAction(action, cancellationToken);
+        while (!cancellationToken.IsCancellationRequested)
+        {
+            var action = PromptOption(Title(), ["Hosts", "Sites", "Devices", "ISP Metrics", "SD-WAN Configs"], "Main menu");
+
+            if (action == 0)
+            {
+                return;
+            }
+
+            try
+            {
+                await (action switch
+                {
+                    1 => DoHosts(cancellationToken),
+                    2 => DoSites(cancellationToken),
+                    3 => DoDevices(cancellationToken),
+                    4 => DoIspMetrics(cancellationToken),
+                    5 => DoSDWanConfigs(cancellationToken),
+                    _ => Task.CompletedTask,
+                });
+            }
+            catch (Exception ex)
+            {
+                WriteError($"Error: {ex.Message}");
+                PressAnyKeyToContinue();
+            }
         }
     }
 
-    private Task DoAction((int Primary, int? Secondary) action, CancellationToken cancellationToken) =>
-        action.Primary switch
-        {
-            1 => DoHosts(action.Secondary, cancellationToken),
-            2 => DoSites(cancellationToken),
-            3 => DoDevices(cancellationToken),
-            _ => Task.CompletedTask,
-        };
-
-    private (int Primary, int? Secondary) PrintMenu()
+    private string Title()
     {
-        Clear();
-        WriteLine("Unifi Site Manager Client Test Harness");
-        WriteLine("-------------------------");
-        WriteLine("1. Hosts");
-        WriteLine("2. Sites");
-        WriteLine("3. Devices");
-        WriteLine("4. ISP Metrics");
-        WriteLine("5. SD-WAN Configs");
-        WriteLine("6. Main menu");
-        Write("Select an option: ");
-
-        var input = ReadKey();
-        WriteLine();
-
-        return input.KeyChar switch
+        var title = "UniFi Site Manager Test Harness";
+        if (SelectedHost is not null)
         {
-            '1' => (1, PrintHostsMenu()),
-            '2' => (2, null), // List Devices
-            '3' => (3, null), // Get Device Details
-            '4' => (4, PrintIspMetricsMenu()), // List Clients
-            '5' => (5, PrintSDWanConfigsMenu()), // Exit
-            '6' => (6, null), // Exit
-            _ => (-1, null)
-        };
+            title += $"\nCurrent host is {SelectedHost.IpAddress} ({SelectedHost.Type})";
+        }
+        if (SelectedSDWanConfig is not null)
+        {
+            title += $"\nCurrent SD-WAN config is {SelectedSDWanConfig.Name}";
+        }
+        return title;
+    }
+
+    private bool SelectedHostCheck()
+    {
+        if (SelectedHost == null)
+        {
+            WriteError("No host selected. Please select a host first (Hosts > List hosts).");
+            PressAnyKeyToContinue();
+            return false;
+        }
+        return true;
     }
 }
-

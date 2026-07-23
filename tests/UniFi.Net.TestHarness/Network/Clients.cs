@@ -41,8 +41,14 @@ public partial class NetworkClient
 
                 break;
             case 2:
-                WriteLine("Getting Client Details...");
-                // Call method to get client details
+                if (!SelectedSiteCheck()) return;
+                if (SelectedClient is null)
+                {
+                    WriteLine("No client selected. Please select a client first (List Clients).");
+                    break;
+                }
+                var clientDetails = await uniFiClient.GetClient(SelectedSite!.Id, SelectedClient.Id, cancellationToken);
+                PrintClient(clientDetails);
                 break;
             default:
                 WriteLine("Invalid client action, please try again.");

@@ -5,26 +5,42 @@ namespace UniFi.Net.TestHarness.Network;
 
 public partial class NetworkClient(INetworkClient uniFiClient)
 {
-    private const byte NetworkExitOption = 9;
+    private const byte NetworkExitOption = 0;
 
     public async Task StartAsync(CancellationToken cancellationToken)
     {
-        var sites = await uniFiClient.ListSites(cancellationToken: cancellationToken);
-
-        SelectedSite = sites.Data.Count > 0 ? sites.Data[0] : null;
-
-        if (SelectedSite != null)
+        try
         {
-            var devices = await uniFiClient.ListDevices(SelectedSite.Id, null, null, 200, cancellationToken);
-            SelectedDevice = devices.Data.Count > 0 ? devices.Data[0] : null;
+            var sites = await uniFiClient.ListSites(cancellationToken: cancellationToken);
+
+            SelectedSite = sites.Data.Count > 0 ? sites.Data[0] : null;
+
+            if (SelectedSite != null)
+            {
+                var devices = await uniFiClient.ListDevices(SelectedSite.Id, null, null, 200, cancellationToken);
+                SelectedDevice = devices.Data.Count > 0 ? devices.Data[0] : null;
+            }
+        }
+        catch (Exception ex)
+        {
+            WriteError($"Could not list sites/devices: {ex.Message}");
+            PressAnyKeyToContinue();
         }
 
-        (int Primary, object? Action) action = (0, null);
+        (int Primary, object? Action) action = (-1, null);
         while (action.Primary != NetworkExitOption && !cancellationToken.IsCancellationRequested)
         {
             action = PrintMenu();
 
-            await DoAction(action, cancellationToken);
+            try
+            {
+                await DoAction(action, cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                WriteError($"Error: {ex.Message}");
+                PressAnyKeyToContinue();
+            }
         }
     }
 
@@ -55,6 +71,9 @@ public partial class NetworkClient(INetworkClient uniFiClient)
                 break;
             case 8:
                 await DoVouchers((int)action.Action!, cancellationToken);
+                break;
+            case 9:
+                await DoReads(cancellationToken);
                 break;
             case NetworkExitOption:
                 break;
@@ -100,6 +119,7 @@ public partial class NetworkClient(INetworkClient uniFiClient)
         WriteLine("6. Device Actions");
         WriteLine("7. Client Actions");
         WriteLine("8. Vouchers");
+        WriteLine("9. All read endpoints");
         WriteLine($"{NetworkExitOption}. Main menu");
         Write("Select an option: ");
 
@@ -116,7 +136,8 @@ public partial class NetworkClient(INetworkClient uniFiClient)
             '6' => (6, PrintDeviceActionsMenu()), // Device Actions
             '7' => (7, PrintClientActionsMenu()),
             '8' => (8, PrintVouchersMenu()),
-            (char)NetworkExitOption => (NetworkExitOption, null), // Exit
+            '9' => (9, null), // All read endpoints
+            '0' => (NetworkExitOption, null), // Exit
             _ => (-1, null)
         };
     }
