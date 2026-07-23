@@ -1,4 +1,7 @@
-﻿namespace UniFi.Net.SiteManager.Models;
+﻿using System.Text.Json.Serialization;
+using UniFi.Net.Serialization;
+
+namespace UniFi.Net.SiteManager.Models;
 
 /// <summary>
 /// Basic configuration for SD-WAN.
@@ -95,6 +98,7 @@ public record SDWanSpoke(
 /// <summary>
 /// Variant of SD-WAN configuration. Values: distributed, failover, single.
 /// </summary>
+[JsonConverter(typeof(CamelCaseEnumConverter))]
 public enum SDWanVariant
 {
     /// <summary>
@@ -116,7 +120,8 @@ public enum SDWanVariant
 /// </summary>
 /// <remarks>This enumeration defines the available modes for configuring spoke-to-hub tunnels,
 /// each offering different trade-offs between resiliency, redundancy, and scalability.</remarks>
-public enum  SpokeToHubTunnelsMode
+[JsonConverter(typeof(CamelCaseEnumConverter))]
+public enum SpokeToHubTunnelsMode
 {
     /// <summary>
     /// Maximum resiliency.
@@ -133,8 +138,9 @@ public enum  SpokeToHubTunnelsMode
 }
 
 /// <summary>
-/// Spoke-to-hub routing. Values: custom, scalable.
+/// Spoke-to-hub routing. Values: custom, geo.
 /// </summary>
+[JsonConverter(typeof(CamelCaseEnumConverter))]
 public enum SpokeToHubRouting
 {
     /// <summary>

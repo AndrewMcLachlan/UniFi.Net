@@ -1,77 +1,53 @@
-﻿using UniFi.Net.SiteManager.Models;
+using UniFi.Net.SiteManager.Models;
 
 namespace UniFi.Net.TestHarness.SiteManager;
 
 internal partial class SiteManagerClient
 {
-    private async Task DoHosts(int? action, CancellationToken cancellationToken)
+    private async Task DoHosts(CancellationToken cancellationToken)
     {
-        switch(action)
+        while (!cancellationToken.IsCancellationRequested)
         {
-            case 1:
-                var hosts = await client.ListHostsAsync(cancellationToken: cancellationToken);
-                PrintHostSelectionMenu(hosts.Data);
-                break;
-            case 2:
-                if (!SelectedHostCheck()) return;
-                var host = await client.GetHostAsync(SelectedHost!.Id, cancellationToken);
-                WriteLine($"{host.Data})");
-                PressAnyKeyToContinue();
-                break;
+            var action = PromptOption(Title() + "\nHosts", ["List hosts (and select)", "Get selected host by ID"]);
+
+            switch (action)
+            {
+                case 0:
+                    return;
+                case 1:
+                    var hosts = await client.ListHostsAsync(cancellationToken: cancellationToken);
+                    var selected = SelectItem("Select a host:", hosts.Data, h => $"{h.IpAddress} - {h.Type} ({h.Id})");
+                    if (selected is not null)
+                    {
+                        SelectedHost = selected;
+                    }
+                    break;
+                case 2:
+                    if (!SelectedHostCheck()) continue;
+                    var host = await client.GetHostAsync(SelectedHost!.Id, cancellationToken);
+                    PrintHost(host.Data);
+                    PressAnyKeyToContinue();
+                    break;
+            }
         }
     }
 
-    private static int PrintHostsMenu()
+    private static void PrintHost(Host host)
     {
         Clear();
-        WriteLine("1. List Hosts");
-        WriteLine("2. Get Host by ID");
-        WriteLine("3. Exit");
-        Write("Select an option: ");
-        if (Int32.TryParse(ReadKey().KeyChar.ToString(), out int choice))
-        {
-            return choice;
-        }
-
-        WriteLine("Invalid choice. Please try again.");
-        return PrintHostsMenu();
-    }
-
-    private void PrintHostSelectionMenu(IReadOnlyList<Host> hosts)
-    {
-        Clear();
-        WriteLine("Select a Host:");
-        WriteLine("-------------------------------");
-        for (int i = 0; i < hosts.Count; i++)
-        {
-            var host = hosts.ElementAt(i);
-            WriteLine($"{host.IpAddress} ({host.Id})");
-        }
-        WriteLine($"{hosts.Count + 1}. Back to Hosts Menu");
-        Write("\nSelect an option: ");
-
-        var input = ReadKey();
-
-        if (!Int32.TryParse(input.KeyChar.ToString(), out var option) || option > hosts.Count + 1)
-        {
-            WriteLine("Invalid option, please try again.");
-            PrintHostSelectionMenu(hosts);
-        }
-        else if (option < hosts.Count + 1)
-        {
-            SelectedHost = hosts[option - 1];
-            // Back to Hosts Menu
-            return;
-        }
-    }
-
-    private bool SelectedHostCheck()
-    {
-        if (SelectedHost == null)
-        {
-            WriteLine("No host selected. Please select a host first.");
-            return false;
-        }
-        return true;
+        WriteHeading("Host Details");
+        WriteLine($"Id:                {host.Id}");
+        WriteLine($"Hardware Id:       {host.HardwareId}");
+        WriteLine($"Type:              {host.Type}");
+        WriteLine($"IP Address:        {host.IpAddress}");
+        WriteLine($"Owner:             {host.Owner}");
+        WriteLine($"Blocked:           {host.IsBlocked}");
+        WriteLine($"Registered:        {host.RegistrationTime:yyyy-MM-dd HH:mm:ss}");
+        WriteLine($"Last State Change: {host.LastConnectionStateChange:yyyy-MM-dd HH:mm:ss}");
+        WriteLine($"Latest Backup:     {host.LatestBackupTime:yyyy-MM-dd HH:mm:ss}");
+        WriteLine($"User:              {host.UserData.FullName} <{host.UserData.Email}> ({host.UserData.Role})");
+        WriteLine($"Apps:              {String.Join(", ", host.UserData.Apps)}");
+        WriteLine($"Controllers:       {String.Join(", ", host.UserData.Controllers)}");
+        WriteLine($"Reported State:    {(host.ReportedState is null ? "(none)" : "(present)")}");
     }
 }

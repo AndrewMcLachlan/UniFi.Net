@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Hosting;
 using UniFi.Net.TestHarness.Network;
 using UniFi.Net.TestHarness.SiteManager;
 
@@ -8,11 +8,15 @@ internal class App(NetworkClient networkClient, SiteManagerClient siteManagerCli
 {
     public async Task StartAsync(CancellationToken cancellationToken)
     {
-        int action = 0;
-
-        while (action >= 0 && !cancellationToken.IsCancellationRequested)
+        while (!cancellationToken.IsCancellationRequested)
         {
-            action = PrintMenu();
+            var action = PromptOption(
+                """
+                UniFi Client Test Harness
+                Choose your API
+                """,
+                ["Network API", "Site Manager API", "Access API"],
+                "Exit");
 
             switch (action)
             {
@@ -24,15 +28,11 @@ internal class App(NetworkClient networkClient, SiteManagerClient siteManagerCli
                     break;
                 case 3:
                     WriteLine("Access API is not implemented yet.");
-                    ReadKey();
+                    PressAnyKeyToContinue();
                     break;
-                case 4:
+                case 0:
                     Environment.Exit(0);
                     break;
-                default:
-                    WriteLine("Invalid option, please try again.");
-                    ReadKey();
-                    continue;
             }
         }
     }
@@ -40,31 +40,5 @@ internal class App(NetworkClient networkClient, SiteManagerClient siteManagerCli
     public Task StopAsync(CancellationToken cancellationToken)
     {
         return Task.CompletedTask;
-    }
-
-    private static int PrintMenu()
-    {
-        Clear();
-        WriteLine("UniFi Client Test Harness");
-        WriteLine("-------------------------");
-        WriteLine("Choose your API");
-        WriteLine("1. Network API");
-        WriteLine("2. Site Manager API");
-        WriteLine("3. Access API ");
-        WriteLine("4. Exit");
-        Write("Select an option: ");
-
-        var input = ReadKey();
-
-        WriteLine();
-
-        if (!Int32.TryParse(input.KeyChar.ToString(), out var option) || option > 4)
-        {
-            WriteLine("Invalid option, please try again.");
-            return -1;
-
-        }
-
-        return option;
     }
 }

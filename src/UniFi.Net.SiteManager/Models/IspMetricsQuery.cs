@@ -25,3 +25,11 @@ public record IspMetricsQuery
     /// </summary>
     public required string SiteId { get; init; }
 }
+
+/// <summary>
+/// The request body for an ISP metrics query.
+/// </summary>
+/// <param name="Sites">The site queries specifying host/site IDs and time ranges.</param>
+internal record IspMetricsQueryRequest(
+    IEnumerable<IspMetricsQuery> Sites
+);

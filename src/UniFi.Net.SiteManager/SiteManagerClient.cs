@@ -16,7 +16,6 @@ public class SiteManagerClient : ISiteManagerClient
     private readonly IHttpClientFactory _httpClientFactory;
 
     private const string Version = "v1";
-    private const string EarlyAccess = "ea";
 
     /// <summary>
     /// Initializes a new instance of the <see cref="SiteManagerClient"/> class using an <see cref="IHttpClientFactory"/>.
@@ -62,7 +61,7 @@ public class SiteManagerClient : ISiteManagerClient
 
         Dictionary<string, StringValues> queryParams = new()
         {
-            ["page"] = pageSize.ToString(),
+            ["pageSize"] = pageSize?.ToString() ?? String.Empty,
             ["nextToken"] = nextToken ?? String.Empty
         };
 
@@ -84,7 +83,7 @@ public class SiteManagerClient : ISiteManagerClient
 
         Dictionary<string, StringValues> queryParams = new()
         {
-            ["page"] = pageSize.ToString(),
+            ["pageSize"] = pageSize?.ToString() ?? String.Empty,
             ["nextToken"] = nextToken ?? String.Empty
         };
 
@@ -110,7 +109,7 @@ public class SiteManagerClient : ISiteManagerClient
     /// <inheritdoc/>
     public Task<DataResponse<IReadOnlyList<IspMetric>>> GetIspMetricsAsync(MetricInterval type, DateTimeOffset? beginTimestamp = null, DateTimeOffset? endTimestamp = null, CancellationToken cancellationToken = default)
     {
-        string url = $"{EarlyAccess}/isp-metrics/{type}";
+        string url = $"{Version}/isp-metrics/{ToPathSegment(type)}";
 
         Dictionary<string, StringValues> queryParams = new()
         {
@@ -122,9 +121,9 @@ public class SiteManagerClient : ISiteManagerClient
     }
 
     /// <inheritdoc/>
-    public Task<DataResponse<IReadOnlyList<IspMetric>>> GetIspMetricsAsync(MetricInterval type, string? duration = null, CancellationToken cancellationToken = default)
+    public Task<DataResponse<IReadOnlyList<IspMetric>>> GetIspMetricsAsync(MetricInterval type, string duration, CancellationToken cancellationToken = default)
     {
-        string url = $"{EarlyAccess}/isp-metrics/{type}";
+        string url = $"{Version}/isp-metrics/{ToPathSegment(type)}";
 
         Dictionary<string, StringValues> queryParams = new()
         {
@@ -135,17 +134,17 @@ public class SiteManagerClient : ISiteManagerClient
     }
 
     /// <inheritdoc/>
-    public Task<DataResponse<IReadOnlyList<IspMetric>>> QueryIspMetricsAsync(MetricInterval type, IEnumerable<IspMetricsQuery> sites, CancellationToken cancellationToken = default)
+    public Task<DataResponse<IspMetricsQueryResult>> QueryIspMetricsAsync(MetricInterval type, IEnumerable<IspMetricsQuery> sites, CancellationToken cancellationToken = default)
     {
-        string url = $"{EarlyAccess}/isp-metrics/{type}/query";
+        string url = $"{Version}/isp-metrics/{ToPathSegment(type)}/query";
 
-        return PostJsonAsync<IEnumerable<IspMetricsQuery>, DataResponse<IReadOnlyList<IspMetric>>>(url, sites, cancellationToken);
+        return PostJsonAsync<IspMetricsQueryRequest, DataResponse<IspMetricsQueryResult>>(url, new IspMetricsQueryRequest(sites), cancellationToken);
     }
 
     /// <inheritdoc/>
     public Task<DataResponse<IReadOnlyList<BasicSDWanConfig>>> ListSDWanConfigsAsync(CancellationToken cancellationToken = default)
     {
-        const string url = $"{EarlyAccess}/sd-wan-configs";
+        const string url = $"{Version}/sd-wan-configs";
 
         return GetFromJsonAsync<DataResponse<IReadOnlyList<BasicSDWanConfig>>>(url, cancellationToken);
     }
@@ -153,7 +152,7 @@ public class SiteManagerClient : ISiteManagerClient
     /// <inheritdoc/>
     public Task<DataResponse<SDWanConfig>> GetSDWanConfigAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        string url = $"{EarlyAccess}/sd-wan-configs/{id}";
+        string url = $"{Version}/sd-wan-configs/{id}";
 
         return GetFromJsonAsync<DataResponse<SDWanConfig>>(url, cancellationToken);
     }
@@ -161,7 +160,7 @@ public class SiteManagerClient : ISiteManagerClient
     /// <inheritdoc/>
     public Task<DataResponse<SDWanConfigStatus>> GetSDWanConfigStatusAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        string url = $"{EarlyAccess}/sd-wan-configs/{id}/status";
+        string url = $"{Version}/sd-wan-configs/{id}/status";
 
         return GetFromJsonAsync<DataResponse<SDWanConfigStatus>>(url, cancellationToken);
     }
@@ -179,8 +178,6 @@ public class SiteManagerClient : ISiteManagerClient
             {
                 await ProcessErrorResponse(requestUri, responseMessage, cancellationToken);
             }
-
-            var content = await responseMessage.Content.ReadAsStringAsync(cancellationToken);
 
             var result = await responseMessage.Content.ReadFromJsonAsync<T>(cancellationToken: cancellationToken);
 
@@ -257,6 +254,13 @@ public class SiteManagerClient : ISiteManagerClient
         }
     }
 
+    private static string ToPathSegment(MetricInterval type) => type switch
+    {
+        MetricInterval.FiveMinutes => "5m",
+        MetricInterval.OneHour => "1h",
+        _ => throw new ArgumentOutOfRangeException(nameof(type), type, "Unknown metric interval.")
+    };
+
     private HttpClient GetClient()
     {
         HttpClient client;
@@ -277,7 +281,7 @@ public class SiteManagerClient : ISiteManagerClient
         }
         var query = String.Join("&", queryParams.Where(kvp => !String.IsNullOrWhiteSpace(kvp.Key) && !String.IsNullOrWhiteSpace(queryParams[kvp.Key]))
             .SelectMany(kvp => queryParams[kvp.Key].Where(v => !String.IsNullOrWhiteSpace(v)).Select(v => $"{kvp.Key}={Uri.EscapeDataString(v!)}")));
-        return "?" + query;
+        return String.IsNullOrEmpty(query) ? String.Empty : "?" + query;
     }
 
     private static IHttpClientFactory CreateFactory(Uri host, string apiKey)

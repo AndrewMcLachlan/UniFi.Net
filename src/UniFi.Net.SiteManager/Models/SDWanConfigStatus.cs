@@ -86,7 +86,7 @@ public record SDWanConfigStatusSpoke(
     IReadOnlyList<SDWanConfigStatusNetwork> Networks,
     IReadOnlyList<SDWanConfigStatusRoute> Routes,
     IReadOnlyList<SDWanConfigStatusConnection> Connections,
-    string ApplyStatus
+    ApplyStatus ApplyStatus
 );
 
 /// <summary>
@@ -157,6 +157,7 @@ public record SDWanConfigStatusTunnel(
 /// <remarks>This enumeration is used to indicate the current state of a configuration operation, such as
 /// creation, update, or removal. It provides detailed statuses to help track the progress or identify failures during
 /// these operations.</remarks>
+[JsonConverter(typeof(CamelCaseEnumConverter))]
 public enum ApplyStatus
 {
     /// <summary>
@@ -194,6 +195,7 @@ public enum ApplyStatus
 /// </summary>
 /// <remarks>This enumeration is used to indicate the current state of a tunnel connection. It can be used to
 /// determine whether a tunnel is actively connected, disconnected, or in the process of connecting.</remarks>
+[JsonConverter(typeof(CamelCaseEnumConverter))]
 public enum TunnelStatus
 {
     /// <summary>

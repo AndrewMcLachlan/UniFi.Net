@@ -9,6 +9,7 @@
     <Import_RootNamespace>UniFi.Net.Core</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)Serialization\CamelCaseEnumConverter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Serialization\SnakeCaseEnumConverter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Serialization\SnakeCaseNamingPolicy.cs" />
   </ItemGroup>

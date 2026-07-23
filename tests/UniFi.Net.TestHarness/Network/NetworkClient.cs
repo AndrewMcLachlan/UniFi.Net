@@ -5,26 +5,42 @@ namespace UniFi.Net.TestHarness.Network;
 
 public partial class NetworkClient(INetworkClient uniFiClient)
 {
-    private const byte NetworkExitOption = 9;
+    private const byte NetworkExitOption = 0;
 
     public async Task StartAsync(CancellationToken cancellationToken)
     {
-        var sites = await uniFiClient.ListSites(cancellationToken: cancellationToken);
-
-        SelectedSite = sites.Data.Count > 0 ? sites.Data[0] : null;
-
-        if (SelectedSite != null)
+        try
         {
-            var devices = await uniFiClient.ListDevices(SelectedSite.Id, null, null, 200, cancellationToken);
-            SelectedDevice = devices.Data.Count > 0 ? devices.Data[0] : null;
+            var sites = await uniFiClient.ListSites(cancellationToken: cancellationToken);
+
+            SelectedSite = sites.Data.Count > 0 ? sites.Data[0] : null;
+
+            if (SelectedSite != null)
+            {
+                var devices = await uniFiClient.ListDevices(SelectedSite.Id, null, null, 200, cancellationToken);
+                SelectedDevice = devices.Data.Count > 0 ? devices.Data[0] : null;
+            }
+        }
+        catch (Exception ex)
+        {
+            WriteError($"Could not list sites/devices: {ex.Message}");
+            PressAnyKeyToContinue();
         }
 
-        (int Primary, object? Action) action = (0, null);
+        (int Primary, object? Action) action = (-1, null);
         while (action.Primary != NetworkExitOption && !cancellationToken.IsCancellationRequested)
         {
             action = PrintMenu();
 
-            await DoAction(action, cancellationToken);
+            try
+            {
+                await DoAction(action, cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                WriteError($"Error: {ex.Message}");
+                PressAnyKeyToContinue();
+            }
         }
     }
 
@@ -56,6 +72,9 @@ public partial class NetworkClient(INetworkClient uniFiClient)
             case 8:
                 await DoVouchers((int)action.Action!, cancellationToken);
                 break;
+            case 9:
+                await DoReads(cancellationToken);
+                break;
             case NetworkExitOption:
                 break;
             default:
@@ -74,49 +93,47 @@ public partial class NetworkClient(INetworkClient uniFiClient)
 
     private (int, object?) PrintMenu()
     {
-        Clear();
-        WriteLine("Unifi Network Client Test Harness");
-        WriteLine("-------------------------");
+        var title = "Unifi Network Client Test Harness";
         if (SelectedSite is not null)
         {
-            WriteLine($"Current site is {SelectedSite.Name}");
-            WriteLine("-------------------------");
+            title += $"\nCurrent site is {SelectedSite.Name}";
         }
         if (SelectedDevice is not null)
         {
-            WriteLine($"Current device is {SelectedDevice.Name}");
-            WriteLine("-------------------------");
+            title += $"\nCurrent device is {SelectedDevice.Name}";
         }
         if (SelectedClient is not null)
         {
-            WriteLine($"Current client is {SelectedClient.Name}");
-            WriteLine("-------------------------");
+            title += $"\nCurrent client is {SelectedClient.Name}";
         }
-        WriteLine("1. Info");
-        WriteLine("2. Sites");
-        WriteLine("3. Devices");
-        WriteLine("4. Clients");
-        WriteLine("5. Port Actions");
-        WriteLine("6. Device Actions");
-        WriteLine("7. Client Actions");
-        WriteLine("8. Vouchers");
-        WriteLine($"{NetworkExitOption}. Main menu");
-        Write("Select an option: ");
 
-        var input = ReadKey();
-        WriteLine();
+        var option = PromptOption(
+            title,
+            [
+                "Info",
+                "Sites",
+                "Devices",
+                "Clients",
+                "Port Actions",
+                "Device Actions",
+                "Client Actions",
+                "Vouchers",
+                "All read endpoints",
+            ],
+            "Main menu");
 
-        return input.KeyChar switch
+        return option switch
         {
-            '1' => (1, null),
-            '2' => (2, PrintSitesMenu()), // List Devices
-            '3' => (3, PrintDevicesMenu()), // Get Device Details
-            '4' => (4, PrintClientsMenu()), // List Clients
-            '5' => (5, PrintPortActionsMenu()), // Port Actions
-            '6' => (6, PrintDeviceActionsMenu()), // Device Actions
-            '7' => (7, PrintClientActionsMenu()),
-            '8' => (8, PrintVouchersMenu()),
-            (char)NetworkExitOption => (NetworkExitOption, null), // Exit
+            1 => (1, null),
+            2 => (2, PrintSitesMenu()),
+            3 => (3, PrintDevicesMenu()),
+            4 => (4, PrintClientsMenu()),
+            5 => (5, PrintPortActionsMenu()),
+            6 => (6, PrintDeviceActionsMenu()),
+            7 => (7, PrintClientActionsMenu()),
+            8 => (8, PrintVouchersMenu()),
+            9 => (9, null), // All read endpoints
+            0 => (NetworkExitOption, null), // Back to main menu
             _ => (-1, null)
         };
     }
